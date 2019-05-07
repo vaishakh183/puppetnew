@@ -1,0 +1,520 @@
+---
+hosts::host_entries:
+  'pulp.tx1-tx.colo':
+    ip: '199.79.62.3'
+  'puppet':
+    ip: '103.211.216.228'
+
+resolv_conf::nameservers:
+  - 8.8.8.8
+  - 8.8.4.4
+
+ntp::servers:
+  - 103.211.218.234
+
+ensure_default_firewall: false
+
+users:
+  cc-uploader:
+    ensure: 'present'
+    home: '/opt/web'
+    home_mode: '755'
+    sshkeys: ['ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA4fC4vZKihH/fbamOk8ij3RcvY9QwfBQM15iTUi8qx3Yvv09u/6axyrQcEUdxOlLpj8PXkTLBowv2tPsWOs8Qajh2RGBr6tHNU3FqbZgHNDibQwuQGThwwq7TCL1aQurGM/APbtW2ZzpBHDIPYdaFlmz38hzqLsoIqWdUQ3urMwSzLZBs+QyC/DX6Nu/M+T1khSvSOvt1NsBpyicu0h+dKY/sLBwF8yAcyb7MtP4LId8m+5SI56qw4OsSl6NQNyR1ICaBjwnvr5rRd3zN9wfXY8+T7cVaE422Qy+IU26YQzNj/jAKQrwB73mbxVOn8ZgQnf6X7fJaGewYeY18RWr+VQ== root@team-city.obox.aus-tx.colo', 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDNhKXJtPpCgiuMLB0aIBCuzVXl1PiFiegzhGZRUpPfd9WRW/OSqkkPaNG6p95xiq/iF2PQkZuqseyWHL3LcbQgMzvaTZ4Ax8KEz5PI3NB9IFw7qFs7t1LjDfOmYIKWWtW8mzDYj/F1m9qwtxdMihLoG8lhtShVjloknJ5z+izdFXckc3ebBsA/s7vC8SLBtCrXyFZLeWFdXwis5jTsCXu/VnS43et9xJURQhTelIsBRL876FM+l+7nemzl2qzhs9zVaD6IFtlTPdessgRe65j7LUU/tNdLv8lD4tvM2MiwjsSAB/CEP+I/aSAxERnbvvvr1z3TdfCTvpS0918xF291 renewal@eigi.com']
+
+cis::nfsnodes:
+  - 'staging1-customercentre.gpx-mum.colo'
+
+profile::accounts::included_users:
+  - rajat.c
+  - karthik.r
+  - neha.d
+  - madhumita.g
+
+sudo::configs:
+  sysengg:
+    priority: 4
+    content: "%apac-engg ALL=NOPASSWD:/usr/bin/less,/bin/grep,/bin/cat,/usr/bin/tail,/usr/bin/head,/bin/zcat,/usr/bin/zless,/usr/bin/zgrep,/var/log/,/usr/bin/vim,/bin/ls,/opt/applog/\n"
+
+cis::su::users: []
+
+cis::webnodes:
+  - 'staging1-customercentre.gpx-mum.colo'
+
+clamav::manage_clamd: true
+clamav::clamd_service_enable: false
+clamav::clamd_service_ensure: stopped
+clamav::manage_freshclam: true
+clamav::freshclam_options:
+ LogTime: yes
+ NotifyClamd: /etc/clamd.d/scan.conf
+
+crons:
+  freshclam:
+    command: '/usr/bin/freshclam --log=/var/log/freshclam.log'
+    hour: '00'
+    minute: '00'
+  system_scan:
+    command: 'ionice -c2 -n7 nice -n19 /usr/bin/clamscan --log=/opt/clamav/scan.log --infected --suppress-ok-results --bytecode=yes --detect-pua=yes --algorithmic-detection=yes --allmatch --recursive=yes --move /opt/clamav/quarantine/ / --exclude-dir /sys --exclude-dir /opt/clamav/quarantine --exclude="(\.amzn1.x86_64.img$|/usr/share/mime/mime.cache$)"'
+    hour: '1'
+    minute: '30'
+
+files:
+  '/opt/clamav':
+    ensure: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0750'
+  '/opt/clamav/quarantine':
+    ensure: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0750'
+  '/opt/applog':
+    ensure: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0777'
+  '/opt/tomcat':
+    ensure: 'directory'
+    owner: 'tomcat'
+    group: 'tomcat'
+    mode: '0750'
+  '/opt/tomcat/userandorder/webapps/manager':
+    ensure: 'directory'
+    recurse: true
+    owner: 'userandorder'
+    group: 'tomcat'
+    source: '/opt/tomcat-template/webapps/manager'
+  '/opt/tomcat/auth/webapps/manager':
+    ensure: 'directory'
+    recurse: true
+    owner: 'auth'
+    group: 'tomcat'
+    source: '/opt/tomcat-template/webapps/manager'
+  '/opt/tomcat/support/webapps/manager':
+    ensure: 'directory'
+    recurse: true
+    owner: 'support'
+    group: 'tomcat'
+    source: '/opt/tomcat-template/webapps/manager'
+  '/opt/tomcat/domain/webapps/manager':
+    ensure: 'directory'
+    recurse: true
+    owner: 'domain'
+    group: 'tomcat'
+    source: '/opt/tomcat-template/webapps/manager'
+  '/opt/tomcat/hosting/webapps/manager':
+    ensure: 'directory'
+    recurse: true
+    owner: 'hosting'
+    group: 'tomcat'
+    source: '/opt/tomcat-template/webapps/manager'
+  '/etc/init.d/tomcat':
+    source: 'puppet:///modules/profile/customercentre/tomcat'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  '/etc/ssl/wildcard.bigrock.in.key':
+    source: 'puppet:///modules/profile/customercentre/wildcard.bigrock.in.key'
+  '/etc/ssl/wildcard.bigrock.in.pem':
+    source: 'puppet:///modules/profile/customercentre/wildcard.bigrock.in.pem'
+
+tomcat::install:
+  '/opt/tomcat-template':
+    source_url: 'https://www-eu.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz'
+tomcat::instances:
+  'userandorder':
+    catalina_home: '/opt/tomcat-template'
+    catalina_base: '/opt/tomcat/userandorder'
+    user: 'userandorder'
+  'auth':
+    catalina_home: '/opt/tomcat-template'
+    catalina_base: '/opt/tomcat/auth'
+    user: 'auth'
+  'support':
+    catalina_home: '/opt/tomcat-template'
+    catalina_base: '/opt/tomcat/support'
+    user: 'support'
+  'domain':
+    catalina_home: '/opt/tomcat-template'
+    catalina_base: '/opt/tomcat/domain'
+    user: 'domain'
+  'hosting':
+    catalina_home: '/opt/tomcat-template'
+    catalina_base: '/opt/tomcat/hosting'
+    user: 'hosting'
+tomcat::config::server:
+  'userandorder':
+    catalina_base: '/opt/tomcat/userandorder'
+    port: '9081'
+  'auth':
+    catalina_base: '/opt/tomcat/auth'
+    port: '9082'
+  'support':
+    catalina_base: '/opt/tomcat/support'
+    port: '9083'
+  'domain':
+    catalina_base: '/opt/tomcat/domain'
+    port: '9084'
+  'hosting':
+    catalina_base: '/opt/tomcat/hosting'
+    port: '9085'
+tomcat::config::server::connector:
+  'userandorder-http':
+    catalina_base: '/opt/tomcat/userandorder'
+    port: '8081'
+    protocol: 'HTTP/1.1'
+    additional_attributes:
+      connectionTimeout: '20000'
+      redirectPort: '8143'
+    purge_connectors: true
+  'auth-http':
+    catalina_base: '/opt/tomcat/auth'
+    port: '8082'
+    protocol: 'HTTP/1.1'
+    additional_attributes:
+      connectionTimeout: '20000'
+      redirectPort: '8243'
+    purge_connectors: true
+  'support-http':
+    catalina_base: '/opt/tomcat/support'
+    port: '8083'
+    protocol: 'HTTP/1.1'
+    additional_attributes:
+      connectionTimeout: '20000'
+      redirectPort: '8343'
+    purge_connectors: true
+  'domain-http':
+    catalina_base: '/opt/tomcat/domain'
+    port: '8084'
+    protocol: 'HTTP/1.1'
+    additional_attributes:
+      connectionTimeout: '20000'
+      redirectPort: '8443'
+    purge_connectors: true
+  'hosting-http':
+    catalina_base: '/opt/tomcat/hosting'
+    port: '8085'
+    protocol: 'HTTP/1.1'
+    additional_attributes:
+      connectionTimeout: '20000'
+      redirectPort: '8543'
+    purge_connectors: true
+  'userandorder-ajp':
+    catalina_base: '/opt/tomcat/userandorder'
+    port: '8181'
+    protocol: 'AJP/1.3'
+    additional_attributes:
+      redirectPort: '8143'
+    purge_connectors: true
+  'auth-ajp':
+    catalina_base: '/opt/tomcat/auth'
+    port: '8182'
+    protocol: 'AJP/1.3'
+    additional_attributes:
+      redirectPort: '8243'
+    purge_connectors: true
+  'support-ajp':
+    catalina_base: '/opt/tomcat/support'
+    port: '8183'
+    protocol: 'AJP/1.3'
+    additional_attributes:
+      redirectPort: '8343'
+    purge_connectors: true
+  'domain-ajp':
+    catalina_base: '/opt/tomcat/domain'
+    port: '8184'
+    protocol: 'AJP/1.3'
+    additional_attributes:
+      redirectPort: '8443'
+    purge_connectors: true
+  'hosting-ajp':
+    catalina_base: '/opt/tomcat/hosting'
+    port: '8185'
+    protocol: 'AJP/1.3'
+    additional_attributes:
+      redirectPort: '8543'
+    purge_connectors: true
+tomcat::setenv::entries:
+  'userandorder_app_log':
+    config_file: '/opt/tomcat/userandorder/bin/setenv.sh'
+    param: 'APP_LOG'
+    value: '/opt/applog'
+    quote_char: '"'
+    order: 1
+  'userandorder_catalina_opts':
+    config_file: '/opt/tomcat/userandorder/bin/setenv.sh'
+    param: 'CATALINA_OPTS'
+    value: '$CATALINA_OPTS -Xms512m -Xmx2048m'
+    quote_char: '"'
+    order: 2
+  'userandorder_spring_profiles-active':
+    config_file: '/opt/tomcat/userandorder/bin/setenv.sh'
+    param: 'SPRING_PROFILES_ACTIVE'
+    value: 'stage'
+    quote_char: '"'
+    order: 3
+  'userandorder_symmetric_key':
+    config_file: '/opt/tomcat/userandorder/bin/setenv.sh'
+    param: 'SYMMETRIC_KEY'
+    value: 'iamsymmetrickey'
+    quote_char: '"'
+    order: 4
+  'userandorder_private_key':
+    config_file: '/opt/tomcat/userandorder/bin/setenv.sh'
+    param: 'PRIVATE_KEY'
+    value: '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'
+    quote_char: '"'
+    order: 5
+  'userandorder_java_opts':
+    config_file: '/opt/tomcat/userandorder/bin/setenv.sh'
+    param: 'JAVA_OPTS'
+    value: '$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -DAPP_LOG=$APP_LOG -Dsymmetric.key=$SYMMETRIC_KEY -Dprivate.key=$PRIVATE_KEY'
+    quote_char: '"'
+    doexport: false
+    order: 6
+  'support_app_log':
+    config_file: '/opt/tomcat/support/bin/setenv.sh'
+    param: 'APP_LOG'
+    value: '/opt/applog'
+    quote_char: '"'
+    order: 1
+  'support_catalina_opts':
+    config_file: '/opt/tomcat/support/bin/setenv.sh'
+    param: 'CATALINA_OPTS'
+    value: '$CATALINA_OPTS -Xms512m -Xmx2048m'
+    quote_char: '"'
+    order: 2
+  'support_spring_profiles-active':
+    config_file: '/opt/tomcat/support/bin/setenv.sh'
+    param: 'SPRING_PROFILES_ACTIVE'
+    value: 'stage'
+    quote_char: '"'
+    order: 3
+  'support_symmetric_key':
+    config_file: '/opt/tomcat/support/bin/setenv.sh'
+    param: 'SYMMETRIC_KEY'
+    value: 'iamsymmetrickey'
+    quote_char: '"'
+    order: 4
+  'support_private_key':
+    config_file: '/opt/tomcat/support/bin/setenv.sh'
+    param: 'PRIVATE_KEY'
+    value: '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'
+    quote_char: '"'
+    order: 5
+  'support_java_opts':
+    config_file: '/opt/tomcat/support/bin/setenv.sh'
+    param: 'JAVA_OPTS'
+    value: '$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -DAPP_LOG=$APP_LOG -Dsymmetric.key=$SYMMETRIC_KEY -Dprivate.key=$PRIVATE_KEY'
+    quote_char: '"'
+    doexport: false
+    order: 6
+  'domain_app_log':
+    config_file: '/opt/tomcat/domain/bin/setenv.sh'
+    param: 'APP_LOG'
+    value: '/opt/applog'
+    quote_char: '"'
+    order: 1
+  'domain_catalina_opts':
+    config_file: '/opt/tomcat/domain/bin/setenv.sh'
+    param: 'CATALINA_OPTS'
+    value: '$CATALINA_OPTS -Xms512m -Xmx2048m'
+    quote_char: '"'
+    order: 2
+  'domain_spring_profiles-active':
+    config_file: '/opt/tomcat/domain/bin/setenv.sh'
+    param: 'SPRING_PROFILES_ACTIVE'
+    value: 'stage'
+    quote_char: '"'
+    order: 3
+  'domain_symmetric_key':
+    config_file: '/opt/tomcat/domain/bin/setenv.sh'
+    param: 'SYMMETRIC_KEY'
+    value: 'iamsymmetrickey'
+    quote_char: '"'
+    order: 4
+  'domain_private_key':
+    config_file: '/opt/tomcat/domain/bin/setenv.sh'
+    param: 'PRIVATE_KEY'
+    value: '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'
+    quote_char: '"'
+    order: 5
+  'domain_java_opts':
+    config_file: '/opt/tomcat/domain/bin/setenv.sh'
+    param: 'JAVA_OPTS'
+    value: '$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -DAPP_LOG=$APP_LOG -Dsymmetric.key=$SYMMETRIC_KEY -Dprivate.key=$PRIVATE_KEY'
+    quote_char: '"'
+    doexport: false
+    order: 6
+  'hosting_app_log':
+    config_file: '/opt/tomcat/hosting/bin/setenv.sh'
+    param: 'APP_LOG'
+    value: '/opt/applog'
+    quote_char: '"'
+    order: 1
+  'hosting_catalina_opts':
+    config_file: '/opt/tomcat/hosting/bin/setenv.sh'
+    param: 'CATALINA_OPTS'
+    value: '$CATALINA_OPTS -Xms512m -Xmx2048m'
+    quote_char: '"'
+    order: 2
+  'hosting_spring_profiles-active':
+    config_file: '/opt/tomcat/hosting/bin/setenv.sh'
+    param: 'SPRING_PROFILES_ACTIVE'
+    value: 'stage'
+    quote_char: '"'
+    order: 3
+  'hosting_symmetric_key':
+    config_file: '/opt/tomcat/hosting/bin/setenv.sh'
+    param: 'SYMMETRIC_KEY'
+    value: 'iamsymmetrickey'
+    quote_char: '"'
+    order: 4
+  'hosting_private_key':
+    config_file: '/opt/tomcat/hosting/bin/setenv.sh'
+    param: 'PRIVATE_KEY'
+    value: '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'
+    quote_char: '"'
+    order: 5
+  'hosting_java_opts':
+    config_file: '/opt/tomcat/hosting/bin/setenv.sh'
+    param: 'JAVA_OPTS'
+    value: '$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -DAPP_LOG=$APP_LOG -Dsymmetric.key=$SYMMETRIC_KEY -Dprivate.key=$PRIVATE_KEY'
+    quote_char: '"'
+    doexport: false
+    order: 6
+  'auth_app_log':
+    config_file: '/opt/tomcat/auth/bin/setenv.sh'
+    param: 'APP_LOG'
+    value: '/opt/applog'
+    quote_char: '"'
+    order: 1
+  'auth_static_ips':
+    config_file: '/opt/tomcat/auth/bin/setenv.sh'
+    param: 'STATIC_IPS'
+    value: '54.202.62.89'
+    quote_char: '"'
+    order: 2
+  'auth_whitelisted_ip':
+    config_file: '/opt/tomcat/auth/bin/setenv.sh'
+    param: 'WHITELISTED_IP'
+    value: '54.202.62.89'
+    quote_char: '"'
+    order: 3
+  'auth_spring_profiles-active':
+    config_file: '/opt/tomcat/auth/bin/setenv.sh'
+    param: 'SPRING_PROFILES_ACTIVE'
+    value: 'stage'
+    quote_char: '"'
+    order: 4
+  'auth_symmetric_key':
+    config_file: '/opt/tomcat/auth/bin/setenv.sh'
+    param: 'SYMMETRIC_KEY'
+    value: 'iamsymmetrickey'
+    quote_char: '"'
+    order: 5
+  'auth_private_key':
+    config_file: '/opt/tomcat/auth/bin/setenv.sh'
+    param: 'PRIVATE_KEY'
+    value: 'MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAJ804fSDemYzvJijITFk8/eIUA07fpgCpcecrS5KPsELwjvRVNAXWLQngdf75fRM++IoQZ8XwWTtVdV08yCZUBVEaqnXYxcFxikdHSzqaEg/biI10IybsV9xgW+d+8lnd1lLheY9tMSazhUBDTnjnbdgnAka37kH8kp259UYJgWvAgMBAAECgYANV20oBGyZa/R+Bg2eCgu3zqCGu1mce3xRAfwxSN+BZe7c/GnTFmHElxr2cpGOq3TgOudk4aS/RHRQ8v/811wyijNDSW+rHB2tt4KNa94J4Ylw0P8kHMXk0O1I/9zLZ8mmCMfh/FX399CZo3PahWfOsJFGqr1jBDxoeZJd2sn14QJBANAGrWk+jkTfabZUmOAJE/ClIlSMxYiqhTVqXfWcPEPw2TGh8ccJbTCNx1Sz5bqIgreD9/o4jNF5hOvW4yKkD3sCQQDD7AcGhgYPXIAjdh9lA2NQTvMWZ+XX0+BxUVbHPaan25/fEYHI5a/lqBcKQHBBlgpRdnKkSU4SU6Jl1F/plVJdAkBsUZ3IOF+CM0brPt+fgHqWipX2qppM0GWua6VjN6gVxHqDooyvlBP7/Uc2rrnHSD+waRIdg4anqHvzBaCdsAmzAkEAg9qzF7bXGTt9mWAD3O2cxw17F9cwnkIfyOOe7VQWdt2eCHg1ykiaSosHhoS7h8g8hXqbyOj0u+zBXJrDOeaemQJBAMoaFHA/l6m1etCJX5HBQ+O+PgvtslFL0m4p0E/Nlk0zW92Qe16wz+1f64Hh7GKzl1p0u+owzMPzF4MG9YIGvrE='
+    quote_char: '"'
+    order: 6
+  'auth_java_opts':
+    config_file: '/opt/tomcat/auth/bin/setenv.sh'
+    param: 'JAVA_OPTS'
+    value: '$JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -Dstatic.ips=$STATIC_IPS -Dwhitelisted.ip=$WHITELISTED_IP -DAPP_LOG=$APP_LOG -Dsymmetric.key=$SYMMETRIC_KEY -Dprivate.key=$PRIVATE_KEY'
+    quote_char: '"'
+    doexport: false
+    order: 7
+tomcat::config::server::tomcat_users:
+  'userandorder_tomcat_user':
+    catalina_base: '/opt/tomcat/userandorder'
+    element: 'user'
+    element_name: 'userandorder'
+    password: 'n1tCmQqggo0fliBmY'
+    roles: [manager, manager-gui, manager-script, admin]
+  'auth_tomcat_user':
+    catalina_base: '/opt/tomcat/auth'
+    element: 'user'
+    element_name: 'auth'
+    password: 'n1tCmQqggo0fliBmY'
+    roles: [manager, manager-gui, manager-script, admin]
+  'support_tomcat_user':
+    catalina_base: '/opt/tomcat/support'
+    element: 'user'
+    element_name: 'support'
+    password: 'n1tCmQqggo0fliBmY'
+    roles: [manager, manager-gui, manager-script, admin]
+  'domain_tomcat_user':
+    catalina_base: '/opt/tomcat/domain'
+    element: 'user'
+    element_name: 'domain'
+    password: 'n1tCmQqggo0fliBmY'
+    roles: [manager, manager-gui, manager-script, admin]
+  'hosting_tomcat_user':
+    catalina_base: '/opt/tomcat/hosting'
+    element: 'user'
+    element_name: 'hosting'
+    password: 'n1tCmQqggo0fliBmY'
+    roles: [manager, manager-gui, manager-script, admin]
+nginx::server_tokens: 'off'
+nginx::confd_purge: true
+nginx::sendfile: 'on'
+nginx::keepalive_timeout: '65'
+nginx::ssl_protocols: 'TLSv1.2'
+nginx::ssl_ciphers: 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK'
+#nginx::ssl_dhparam: '/etc/ssl/certs/dhparam.pem'
+nginx::gzip: 'on'
+nginx::gzip_proxied: 'no-cache no-store private expired auth'
+nginx::gzip_min_length: '1000'
+nginx::gzip_types: 'text/plain text/css application/xml image/png application/javascript image/jpeg'
+nginx::nginx_servers:
+  'customercentre-staging.bigrock.in_ssl':
+    server_name: ['customercentre-staging.bigrock.in','*.customercentre-staging.bigrock.in']
+    ssl: true
+    ssl_port: 443
+    listen_port: 443
+    ssl_cert: '/etc/ssl/wildcard.bigrock.in.pem'
+    ssl_key: '/etc/ssl/wildcard.bigrock.in.key'
+    access_log: '/var/log/nginx/customercentre-staging.bigrock.in-access.log'
+    error_log: '/var/log/nginx/customercentre-staging.bigrock.in-error.log'
+    index_files: [index.html]
+    add_header:
+      Strict-Transport-Security: max-age=63072000; includeSubDomains;
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+    use_default_location: false
+    locations:
+      '/':
+        location_cfg_append:
+          root: '/opt/web/public'
+          index: 'index.html'
+      '/nginx_status':
+          location_allow: ['127.0.0.1']
+          location_deny: ['all']
+          stub_status: true
+      '/userandorder':
+          proxy: 'http://127.0.0.1:8081/'
+      '~ ^/userandorder/(.*)':
+          proxy: 'http://127.0.0.1:8081'
+      '/auth':
+          proxy: 'http://127.0.0.1:8082/'
+      '~ ^/auth/(.*)':
+          proxy: 'http://127.0.0.1:8082'
+      '/support':
+          proxy: 'http://127.0.0.1:8083/'
+      '~ ^/support/(.*)':
+          proxy: 'http://127.0.0.1:8083'
+      '/domain':
+          proxy: 'http://127.0.0.1:8084/'
+      '~ ^/domain/(.*)':
+          proxy: 'http://127.0.0.1:8084'
+      '/hosting':
+          proxy: 'http://127.0.0.1:8085/'
+      '~ ^/hosting/(.*)':
+          proxy: 'http://127.0.0.1:8085'
+  'customercentre-staging.bigrock.in_nonssl':
+    server_name: ['_']
+    rewrite_rules:  ['^/(.*)$ https://customercentre-staging.bigrock.in/$1 permanent']
+

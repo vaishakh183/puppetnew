@@ -1,0 +1,128 @@
+
+
+bind::server::conf:
+  '/etc/named.conf':
+    listen_on_addr: [ 'any' ]
+    listen_on_v6_addr: [ 'any' ]
+    forwarders: [ '8.8.8.8', '8.8.4.4' ]
+    allow_recursion: [ 'sdh-tr', 'common', 'private', 'aus-tx', 'mgd-sl-hst', 'dlls-tx', 'mgd-sl-dlls', 'plex-mum', 'managed-misc', 'gpx-mum', 'tel-uk', 'vsnl-mum', 'directi-aws', 'codechef-aws', 'remote-office', 'nyc-ix', 'sdh-tr', 'stnc-cn',  'tel-hk', 'aws-ncal', 'c1-tx', 'oregon-aws', 'aws-mum' ]
+    allow_query: [ 'sdh-tr', 'common', 'private', 'aus-tx', 'mgd-sl-hst', 'dlls-tx', 'mgd-sl-dlls', 'plex-mum', 'managed-misc', 'gpx-mum', 'tel-uk', 'vsnl-mum', 'directi-aws', 'codechef-aws', 'remote-office', 'nyc-ix', 'sdh-tr', 'stnc-cn',  'tel-hk', 'aws-ncal', 'c1-tx', 'oregon-aws', 'aws-mum' ]
+    allow_query_cache: [ 'sdh-tr', 'common', 'private', 'aus-tx', 'mgd-sl-hst', 'dlls-tx', 'mgd-sl-dlls', 'plex-mum', 'managed-misc', 'gpx-mum', 'tel-uk', 'vsnl-mum', 'directi-aws', 'codechef-aws', 'remote-office', 'nyc-ix', 'sdh-tr', 'stnc-cn',  'tel-hk', 'aws-ncal', 'c1-tx', 'oregon-aws', 'aws-mum' ]
+    allow_transfer: [ 'none' ]
+    version: 'none'
+    dnssec_validation: 'auto'
+    zones:
+      as394695.net: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.as394695.net"' ]
+      172.21.0: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.172.21.0"' ]
+      aus-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.aus-tx.colo"' ]
+      vps.aus-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.vps.aus-tx.colo"' ]
+      vps.gpx-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.vps.gpx-mum.colo"' ]
+      vsnl-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.vsnl-mum.colo"' ]
+      gpx-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.gpx-mum.colo"' ]
+      tel-uk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.tel-uk.colo"' ]
+      tx1-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.tx1-tx.colo"' ]
+      c1-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.c1-tx.colo"' ]
+      sdh-tr.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.sdh-tr.colo"' ]
+      stnc-cn.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.stnc-cn.colo"' ]
+      tel-hk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.tel-hk.colo"' ]
+      shared.tel-uk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.tel-uk.colo"' ]
+      shared.aus-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.aus-tx.colo"' ]
+      shared.gpx-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.gpx-mum.colo"' ]
+      shared.sdh-tr.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.sdh-tr.colo"' ]
+      shared.tel-hk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.tel-hk.colo"' ]
+      shared.stnc-cn.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.stnc-cn.colo"' ]
+      shared.c1-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.c1-tx.colo"' ]
+      oregon.aws: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.oregon.aws"' ]
+      corp.endurance.com: [ 'type forward', 'forwarders { 172.27.152.39; 172.27.152.40; }' ]
+      roving.com: [ 'type forward', 'forwarders { 172.27.152.39; 172.27.152.40; }' ]
+      prodcc.net: [ 'type forward', 'forwarders { 172.27.152.39; 172.27.152.40; }' ]
+      aws-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.aws-mum.colo"' ]
+      4.17.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.4.17.172.in-addr.arpa"' ]
+      210.16.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.210.16.172.in-addr.arpa"' ]
+      214.16.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.214.16.172.in-addr.arpa"' ]
+      0.21.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.0.21.172.in-addr.arpa"' ]
+      0.23.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.0.23.172.in-addr.arpa"' ]
+    includes: [ '/var/named/acl.file' ]
+    extra_options:
+      recursive-clients: '20000'
+      allow-notify: '{ 172.17.160.48; }'
+      dnssec-accept-expired: 'no'
+bind::server::files:
+  'acl.file':
+    source_base: 'puppet:///modules/bind/'
+resolv_conf::nameservers:
+  - 172.16.188.50
+
+rsyslog::client::legacy_config:
+  remotelog:
+    value: "local3.*,authpriv.*,mail.*,cron.* @@logarchiver.aus-tx.colo:51405"
+    type: "legacy"
+    priority: 100
+
+exec:
+  'Modify ownership and permissions':
+    command: 'chown -R root /var/named/ /var/run/named && chmod 775 /var/run/named'
+    path: '/usr/bin:/bin'
+    notify: Service[named]
+    onlyif: 'stat --format "%U" /var/named/dynamic |grep named'
+
+
+tcpwrappers::allow:
+  'allow_Bangalore':
+    client_list: ['115.110.71.144/255.255.255.252','122.15.181.196/255.255.255.252']
+    daemon_list: 'ALL'
+    order: '22_sshd_all'
+    comment: 'Bangalore'
+
+  'allow_Mumbai':
+    client_list: ['115.110.127.198','122.15.255.69','115.110.126.72/255.255.255.248','122.15.251.40/255.255.255.248','172.16.128.0/255.255.192.0','10.86.0.0/255.255.0.0']
+    daemon_list: 'ALL'
+    order: '22_sshd_all'
+    comment: 'Mumbai'
+    
+  'allow_nsca':
+    client_list: ['172.23.40.11','172.17.40.35','172.16.211.20','172.25.40.16','172.21.40.11','172.26.40.11','172.23.150.11',209.99.106.98,'74.119.239.188/255.255.255.248','172.23.128.56']
+    daemon_list: 'ALL'
+    order: '22_sshd_all'
+    comment: 'Allowing tr private subnet for nsca service'
+    
+  'allow_git_directi':
+    client_list: ['172.17.4.27']
+    daemon_list: 'sshd'
+    order: '22_sshd_all'
+    comment: 'Allow git.directi.com IP for Backup'
+    
+  'allow_gitlab_inbom1':
+    client_list: ['172.23.128.89']
+    daemon_list: 'ALL'
+    order: '22_sshd_all'
+    comment: 'Allow gitlab.inbom1.webhostbox.net ssh access'
+    
+
+  'allow_puppet_masters':
+    client_list: ['172.23.150.0/255.255.255.0']
+    daemon_list: 'ALL'
+    order: '22_sshd_all'
+    comment: 'Allow New puppet masters to access each other'
+    
+
+  'allow_old_puppet_masters':
+    client_list: ['172.17.53.148','172.17.4.21','172.24.40.25']
+    daemon_list: 'ALL'
+    order: '22_sshd_all'
+    comment: 'Allow old puppet masters to access puppettwoca'
+    
+
+  'allow_sentinel.c1':
+    client_list: ['10.249.10.22']
+    daemon_list: 'ALL'
+    order: '22_sshd_all'
+    comment: 'sentinel.c1' 
+
+  'deny_all_ssh_traffic':
+    client_list: 'ALL'
+    daemon_list: 'sshd'
+    order: '22_sshd_all'
+    comment: "Allow no other IP's to ssh on this server"
+    optional_actions: 'DENY'
+

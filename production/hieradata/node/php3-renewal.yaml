@@ -1,0 +1,196 @@
+---
+hosts::host_entries:
+  'jarvis.corp.endurance.com':
+    ip: '172.16.189.132'
+
+files:
+  '/etc/php.ini':
+    source: 'puppet:///modules/profile/renewalapp/php.ini'
+
+packages: [php71u-gd, php71u-mbstring]
+
+apache::vhost:
+  api.hostgator.in:
+    servername: 'api.hostgator.in'
+    port: '80'
+    docroot: '/var/www/api/public'
+    docroot_owner: 'app-uploader'
+    docroot_group: 'apache'
+    directories:
+      path: '/var/www/api/public'
+      headers:
+        - 'always set Access-Control-Allow-Origin "https://my.hostgator.in"'
+        - 'always set Access-Control-Allow-Methods "POST, GET"'
+        - 'always set Access-Control-Allow-Headers "Content-Type"'
+        - 'always set Access-Control-Allow-Credentials true'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+      allow_override: 'None'
+      options:
+        - '-Indexes'
+        - '-Multiviews'
+        - '-Includes'
+      rewrites:
+        - rewrite_cond:
+           - '%%{}{HTTP:X-Forwarded-Proto} !https'
+        - rewrite_cond:
+           - '%%{}{HTTP_USER_AGENT} !^ELB-HealthChecker'
+        - rewrite_rule:
+           - '(.*) https://%%{}{HTTP_HOST}%%{}{REQUEST_URI} [L,R=301]'
+        - rewrite_cond:
+           - '%%{}{HTTP:Authorization} .'
+        - rewrite_rule:
+           -  '.* - [E=HTTP_AUTHORIZATION:%%{}{HTTP:Authorization}]'
+        - rewrite_cond:
+           - '%%{}{REQUEST_FILENAME} !-f'
+           - '%%{}{REQUEST_FILENAME} !-d'
+        - rewrite_rule:
+           - "^(.*) index.php/ [L]"
+    filters:
+      - 'AddOutputFilterByType DEFLATE text/plain'
+      - 'AddOutputFilterByType DEFLATE text/html'
+      - 'AddOutputFilterByType DEFLATE text/xml'
+      - 'AddOutputFilterByType DEFLATE text/css'
+      - 'AddOutputFilterByType DEFLATE application/js'
+      - 'AddOutputFilterByType DEFLATE application/javascript'
+      - 'AddOutputFilterByType DEFLATE application/x-javascript'
+  api.bigrock.in:
+    servername: 'api.bigrock.in'
+    port: '80'
+    docroot: '/var/www/api/public'
+    docroot_owner: 'app-uploader'
+    docroot_group: 'apache'
+    setenvif:
+        - 'Origin "http(s)?://((my|www)\.)?(bigrock.in)$" AccessControlAllowOrigin=$0'
+    directories:
+      path: '/var/www/api/public'
+      headers:
+        - 'always set Access-Control-Allow-Origin %%{}{AccessControlAllowOrigin}e env=AccessControlAllowOrigin'
+        - 'always set Access-Control-Allow-Methods "POST, GET"'
+        - 'always set Access-Control-Allow-Headers "Content-Type"'
+        - 'always set Access-Control-Allow-Credentials true'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+      allow_override: 'None'
+      options:
+        - '-Indexes'
+        - '-MultiViews'
+        - '-Includes'
+      rewrites:
+        - rewrite_cond:
+           - '%%{}{HTTP:X-Forwarded-Proto} !https'
+        - rewrite_cond:
+           - '%%{}{HTTP_USER_AGENT} !^ELB-HealthChecker'
+        - rewrite_rule:
+           - '(.*) https://%%{}{HTTP_HOST}%%{}{REQUEST_URI} [L,R=301]'
+        - rewrite_cond:
+           - '%%{}{HTTP:Authorization} .'
+        - rewrite_rule:
+           -  '.* - [E=HTTP_AUTHORIZATION:%%{}{HTTP:Authorization}]'
+        - rewrite_cond:
+           - '%%{}{REQUEST_FILENAME} !-f'
+           - '%%{}{REQUEST_FILENAME} !-d'
+        - rewrite_rule:
+           - "^(.*) index.php/ [L]"
+    filters:
+      - 'AddOutputFilterByType DEFLATE text/plain'
+      - 'AddOutputFilterByType DEFLATE text/html'
+      - 'AddOutputFilterByType DEFLATE text/xml'
+      - 'AddOutputFilterByType DEFLATE text/css'
+      - 'AddOutputFilterByType DEFLATE application/js'
+      - 'AddOutputFilterByType DEFLATE application/javascript'
+      - 'AddOutputFilterByType DEFLATE application/x-javascript'
+  support-domains-api.hostgator.in:
+    servername: 'support-domains-api.hostgator.in'
+    port: '80'
+    docroot: '/var/www/api/public'
+    docroot_owner: 'app-uploader'
+    docroot_group: 'apache'
+    directories:
+      path: '/var/www/api/public'
+      headers:
+        - 'always set Access-Control-Allow-Origin "https://support-domains.hostgator.in"'
+        - 'always set Access-Control-Allow-Methods "POST, GET"'
+        - 'always set Access-Control-Allow-Headers "Content-Type"'
+        - 'always set Access-Control-Allow-Credentials true'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+      allow_override: 'None'
+      options:
+        - '-Indexes'
+        - '-Multiviews'
+        - '-Includes'
+      rewrites:
+        - rewrite_cond:
+           - '%%{}{HTTP:X-Forwarded-Proto} !https'
+        - rewrite_cond:
+           - '%%{}{HTTP_USER_AGENT} !^ELB-HealthChecker'
+        - rewrite_rule:
+           - '(.*) https://%%{}{HTTP_HOST}%%{}{REQUEST_URI} [L,R=301]'
+        - rewrite_cond:
+           - '%%{}{HTTP:Authorization} .'
+        - rewrite_rule:
+           -  '.* - [E=HTTP_AUTHORIZATION:%%{}{HTTP:Authorization}]'
+        - rewrite_cond:
+           - '%%{}{REQUEST_FILENAME} !-f'
+           - '%%{}{REQUEST_FILENAME} !-d'
+        - rewrite_rule:
+           - "^(.*) index.php/ [L]"
+    filters:
+      - 'AddOutputFilterByType DEFLATE text/plain'
+      - 'AddOutputFilterByType DEFLATE text/html'
+      - 'AddOutputFilterByType DEFLATE text/xml'
+      - 'AddOutputFilterByType DEFLATE text/css'
+      - 'AddOutputFilterByType DEFLATE application/js'
+      - 'AddOutputFilterByType DEFLATE application/javascript'
+      - 'AddOutputFilterByType DEFLATE application/x-javascript'
+  api.bluehost.in:
+    servername: 'api.bluehost.in'
+    port: '80'
+    docroot: '/var/www/api/public'
+    docroot_owner: 'app-uploader'
+    docroot_group: 'apache'
+    setenvif:
+        - 'Origin "http(s)?://(www.)?(bluehost.in)$" AccessControlAllowOrigin=$0'
+    directories:
+      path: '/var/www/api/public'
+      headers:
+        - 'always set Access-Control-Allow-Origin %%{}{AccessControlAllowOrigin}e env=AccessControlAllowOrigin'
+        - 'always set Access-Control-Allow-Methods "POST, GET"'
+        - 'always set Access-Control-Allow-Headers "Content-Type"'
+        - 'always set Access-Control-Allow-Credentials true'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+      allow_override: 'None'
+      options:
+        - '-Indexes'
+        - '-MultiViews'
+        - '-Includes'
+      rewrites:
+        - rewrite_cond:
+           - '%%{}{HTTP:X-Forwarded-Proto} !https'
+        - rewrite_cond:
+           - '%%{}{HTTP_USER_AGENT} !^ELB-HealthChecker'
+        - rewrite_rule:
+           - '(.*) https://%%{}{HTTP_HOST}%%{}{REQUEST_URI} [L,R=301]'
+        - rewrite_cond:
+           - '%%{}{HTTP:Authorization} .'
+        - rewrite_rule:
+           -  '.* - [E=HTTP_AUTHORIZATION:%%{}{HTTP:Authorization}]'
+        - rewrite_cond:
+           - '%%{}{REQUEST_FILENAME} !-f'
+           - '%%{}{REQUEST_FILENAME} !-d'
+        - rewrite_rule:
+           - "^(.*) index.php/ [L]"
+    filters:
+      - 'AddOutputFilterByType DEFLATE text/plain'
+      - 'AddOutputFilterByType DEFLATE text/html'
+      - 'AddOutputFilterByType DEFLATE text/xml'
+      - 'AddOutputFilterByType DEFLATE text/css'
+      - 'AddOutputFilterByType DEFLATE application/js'
+      - 'AddOutputFilterByType DEFLATE application/javascript'
+      - 'AddOutputFilterByType DEFLATE application/x-javascript'

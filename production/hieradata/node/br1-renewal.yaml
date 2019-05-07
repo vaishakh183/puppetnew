@@ -1,0 +1,60 @@
+---
+apache::vhost:
+  my.bigrock.in:
+    servername: 'my.bigrock.in'
+    port: '80'
+    docroot: '/var/www/br-cp/public'
+    docroot_owner: "app-uploader"
+    docroot_group: "apache"
+    directories:
+      path: '/var/www/br-cp/public'
+      headers: 
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+      allow_override: 'None'
+      options:
+        - '-Indexes'
+        - '-MultiViews'
+        - '-Includes'
+      rewrites:
+        - rewrite_cond:
+           - '%%{}{HTTP:X-Forwarded-Proto} !https'
+        - rewrite_cond:
+           - '%%{}{HTTP_USER_AGENT} !^ELB-HealthChecker'
+        - rewrite_rule:
+           - '(.*) https://%%{}{HTTP_HOST}%%{}{REQUEST_URI} [L,R=301]'
+        - rewrite_cond: 
+           - '%%{}{HTTP:Authorization} .'
+        - rewrite_rule:
+           -  '.* - [E=HTTP_AUTHORIZATION:%%{}{HTTP:Authorization}]'
+        - rewrite_cond: 
+           - '%%{}{REQUEST_FILENAME} !-f'
+           - '%%{}{REQUEST_FILENAME} !-d'
+        - rewrite_rule: 
+           - "^(.*)$ index.php/ [L]"
+    filters:
+      - 'AddOutputFilterByType DEFLATE text/plain'
+      - 'AddOutputFilterByType DEFLATE text/html'
+      - 'AddOutputFilterByType DEFLATE text/xml'
+      - 'AddOutputFilterByType DEFLATE text/css'
+      - 'AddOutputFilterByType DEFLATE text/javascript'
+      - 'AddOutputFilterByType DEFLATE application/js'
+      - 'AddOutputFilterByType DEFLATE application/javascript'
+      - 'AddOutputFilterByType DEFLATE application/x-javascript'
+      - 'AddOutputFilterByType DEFLATE image/jpeg'
+      - 'AddOutputFilterByType DEFLATE image/png'
+      - 'AddOutputFilterByType DEFLATE image/jpg'
+
+apache::mod::expires::expires_by_type:
+      image/jpg: 'access plus 1 week'
+      image/jpeg: 'access plus 1 week'
+      image/png: 'access plus 1 week'
+      text/javascript: 'access plus 4 hours'
+      text/js: 'access plus 4 hours'
+      application/x-javascript: 'access plus 4 hours'
+      application/javascript: 'access plus 4 hours'
+      text/css: 'access plus 4 hours'

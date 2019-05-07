@@ -1,0 +1,238 @@
+# interactive mode for testing
+# interactive
+# System authorization information
+auth  --useshadow  --enablemd5
+# System bootloader configuration
+bootloader --location mbr --driveorder sda --append="net.ifnames=0 biosdevname=0"
+# Use text mode install
+text
+# Firewall configuration
+firewall --enabled
+# Run the Setup Agent on first boot
+firstboot --disable
+# System keyboard
+keyboard us
+# System language
+lang en_US
+# Use network installation
+url --url=$tree
+# disable unwanted services:
+services --disabled atd,autofs,avahi-daemon,cups,firstboot,gpm,ip6tables,kudzu,lvm2-monitor,mcstrans,mdmonitor,netfs,nfs,nfslock,portmap,readahead_early,restorecond,rpcgssd,rpcidmapd
+# If any cobbler repo definitions were referenced in the kickstart profile, include them here.
+$yum_repo_stanza
+# Network information
+# $SNIPPET('network_config')
+# Reboot after installation
+reboot
+
+# Root password qwedsa@123
+rootpw --iscrypted $1$alqDP1$piq1L9pVtpAYXt5PhnwXt/
+# rootpw --iscrypted $1$8g3KM8gJ$aS50drVadqRcHXYJpp1.X/
+
+# SELinux configuration
+selinux --disabled
+# Do not configure the X Window System
+skipx
+# System timezone
+timezone  Etc/GMT
+# Install OS instead of upgrade
+install
+# Clear the Master Boot Record
+zerombr
+# Allow anaconda to partition the system as needed
+clearpart --all --initlabel
+part /boot --fstype ext4 --size=500 --ondisk sda
+part swap --size 4096 --ondisk sda
+part / --fstype ext4 --size 1000 --grow --ondisk sda
+
+%pre
+#$SNIPPET('log_ks_pre')
+#$kickstart_start
+# Enable installation monitoring
+#$SNIPPET('pre_anamon')
+#$SNIPPET('pre_install_network_config')
+
+
+%packages --nobase
+
+@core
+-ed
+-selinux-policy-targeted
+-vim-minimal
+-policycoreutils
+-setools
+-setserial
+-dhcpv6-client
+-centos-release-notes
+rsyslog
+
+# Group: Base
+-cyrus-sasl-plain
+-mailcap
+acl
+-ksh
+-nss_ldap
+-krb5-workstation
+-mcelog
+-aspell-en
+-stunnel
+-words
+-apmd
+-coolkey
+-coolkey-devel
+-aspell
+-vconfig
+-sendmail
+-rdate
+-pcmciautils
+-pam_ccreds
+-pam_smb
+-pam_pkcs11
+-conman
+-pkinit-nss
+-microcode_ctl
+-sysreport
+-mkbootdisk
+-pam_passwdqc
+-ypbind
+-oddjob
+-mtools
+-specspo
+-rsh
+-ipsec-tools
+-rp-pppoe
+-pm-utils
+-pam_krb5
+-irda-utils
+-amtu
+-cryptsetup-luks
+-wireless-tools
+-ccid
+-tcsh
+-anacron
+-eject
+-bluez-utils
+-logwatch
+-usbutils
+-gnupg
+-talk
+-yum-updatesd
+sos
+dos2unix
+gpm
+mtr
+tree
+sudo
+jwhois
+nc
+x86info
+openssh-clients
+traceroute
+coreutils
+
+# Group: editors
+vim-enhanced
+
+# Group: System Tools
+nmap
+ntp
+screen
+iptraf
+lsscsi
+mc
+sysstat
+mlocate
+
+# Group: Text-based Internet
+tftp
+lynx
+elinks
+wget
+lftp
+rsync
+
+# Group: admin-tools:
+# system-config-network-tui
+
+# Group: Development Tools
+autoconf
+automake
+binutils
+gcc
+gdb
+libtool
+make
+strace
+ltrace
+
+# Group: Applications/Databases
+
+# Group: System Environment/Daemons
+xinetd
+
+# Other packages:
+
+# Group: System Environment/Kernel
+kernel-devel
+
+# Group: Development/Languages
+perl
+ruby
+-ruby-libs.x86_64
+-ruby-devel.x86_64
+-rubygems
+-rubygem-rspec
+-puppet
+-facter
+-augeas-libs
+-ruby-augeas
+-ruby-shadow
+
+# Group: System Environment/Base
+-OpenIPMI
+-OpenIPMI-tools
+man
+-info
+
+# don't want this junk:
+-dbus
+-cups
+-cups-libs
+-mysql
+-iscsi-initiator-utils
+
+%end
+
+# Post-install stuff:
+%post
+
+yum update -y --skip-broken
+
+#$SNIPPET('log_ks_post')
+
+# now we can create a separate dir. to log to
+test -d /var/log/kickstart || mkdir /var/log/kickstart
+
+$SNIPPET('correct_drive_labels_normal')
+
+echo -e "\nRunning Post Installation Script\n"
+
+# Start yum configuration
+$yum_config_stanza
+# End yum configuration
+$SNIPPET('epel6_repo_config')
+#$SNIPPET('post_install_kernel_options')
+#SNIPPET('omsa')
+#$SNIPPET('koan_environment')
+# Enable post-install boot notification
+#$SNIPPET('post_anamon')
+# $SNIPPET('post_install_network_config')
+#$SNIPPET('fs-tuning')
+# TODO: REMEMBER TO ADD DISK CACHE DISABLING SCRIPT LATER
+# Start final steps
+$kickstart_done
+# End final steps
+
+reboot
+
+%end

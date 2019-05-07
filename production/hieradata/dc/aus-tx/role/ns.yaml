@@ -1,0 +1,69 @@
+---
+bind::server::conf:
+  '/etc/named.conf':
+    listen_on_addr: [ 'any' ]
+    listen_on_v6_addr: [ 'any' ]
+    forwarders: [ '8.8.8.8', '8.8.4.4' ]
+    allow_recursion: [ 'private', 'aus-tx;mgd-sl-hst', 'dlls-tx', 'mgd-sl-dlls', 'plex-mum', 'managed-misc', 'gpx-mum', 'tel-uk', 'vsnl-mum', 'remote-office', 'stnc-cn', 'tel-hk', 'aws-ncal', 'c1-tx', 'oregon-aws', 'aws-mum' ]
+    allow_query: [ 'private', 'aus-tx;mgd-sl-hst', 'dlls-tx', 'mgd-sl-dlls', 'plex-mum', 'managed-misc', 'gpx-mum', 'tel-uk', 'vsnl-mum', 'remote-office', 'stnc-cn', 'tel-hk', 'aws-ncal', 'c1-tx', 'oregon-aws', 'aws-mum' ]
+    allow_query_cache: [ 'private', 'aus-tx;mgd-sl-hst', 'dlls-tx', 'mgd-sl-dlls', 'plex-mum', 'managed-misc', 'gpx-mum', 'tel-uk', 'vsnl-mum', 'remote-office', 'stnc-cn', 'tel-hk', 'aws-ncal', 'c1-tx', 'oregon-aws', 'aws-mum' ]
+    allow_transfer: [ 'none' ]
+    version: 'none'
+    dnssec_validation: 'auto'
+    zones:
+      as394695.net: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.as394695.net"' ]
+      172.21.0: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.172.21.0"' ]
+      aus-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.aus-tx.colo"' ]
+      vps.aus-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.vps.aus-tx.colo"' ]
+      vps.gpx-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.vps.gpx-mum.colo"' ]
+      vsnl-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.vsnl-mum.colo"' ]
+      gpx-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.gpx-mum.colo"' ]
+      tel-uk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.tel-uk.colo"' ]
+      tx1-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.tx1-tx.colo"' ]
+      c1-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.c1-tx.colo"' ]
+      sdh-tr.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.sdh-tr.colo"' ]
+      stnc-cn.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.stnc-cn.colo"' ]
+      tel-hk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.tel-hk.colo"' ]
+      shared.tel-uk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.tel-uk.colo"' ]
+      shared.aus-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.aus-tx.colo"' ]
+      shared.gpx-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.gpx-mum.colo"' ]
+      shared.sdh-tr.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.sdh-tr.colo"' ]
+      shared.tel-hk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.tel-hk.colo"' ]
+      shared.stnc-cn.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.stnc-cn.colo"' ]
+      shared.c1-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.c1-tx.colo"' ]
+      oregon.aws: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.oregon.aws"' ]
+      corp.endurance.com: [ 'type forward', 'forwarders { 172.27.152.39; 172.27.152.40; }' ]
+      roving.com: [ 'type forward', 'forwarders { 172.27.152.39; 172.27.152.40; }' ]
+      prodcc.net: [ 'type forward', 'forwarders { 172.27.152.39; 172.27.152.40; }' ]
+      aws-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.aws-mum.colo"' ]
+      4.17.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.4.17.172.in-addr.arpa"' ]
+      210.16.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.210.16.172.in-addr.arpa"' ]
+      214.16.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.214.16.172.in-addr.arpa"' ]
+      0.21.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.0.21.172.in-addr.arpa"' ]
+      0.23.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.0.23.172.in-addr.arpa"' ]
+    includes: [ '/var/named/acl.file', '/etc/rndc.key' ]
+    extra_options:
+      recursive-clients: '20000'
+      allow-notify: '{ 172.17.160.48; }'
+      dnssec-accept-expired: 'no'
+      querylog: 'yes'
+    controls:
+      '127.0.0.1':
+        address_match_list: ['localhost']
+        keys_list: ['gpx-rndc-key']
+        port: 953
+bind::server::files:
+  'acl.file':
+    source_base: 'puppet:///modules/bind/'
+bind::rndc:
+    'rndc_configuration':
+        rndc_keyname: 'gpx-rndc-key'
+        rndc_algorithm: 'hmac-sha256'
+        rndc_secret: 'ENC[PKCS7,MIIBmQYJKoZIhvcNAQcDoIIBijCCAYYCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEAtBL4GEcdyzO6YtPCsqFowhFYBlaSrLqFEkq53qVlyKFfyfbhWLa2hA91J8VZJCASKu6H6S16W6uO3KuUaD4FiqNAOCIgsxVDq5GpfsGwwx2EfM+c0BcSCAD/x27WdmeGOiGRUBxBQmtu2AwP3wl19DCaWzJAjraa3VgBEJplxe5d/Zr5FHpf6hdmsThBH9owntDRRyWqva9V2KioMuEf8DxSnblnzP7DQqnhLxe6B2YK8d+OzX8YpA8nOcpZmUtm8XA3Kft8xw197jkQ/gVOPRdXi6rZY+Ymt0hRi4Dt0RJJds30g80h22pwJLO1fQ5JW09Ph3j/Is57Bfm7v6FNGjBcBgkqhkiG9w0BBwEwHQYJYIZIAWUDBAEqBBD+3IQXR+s/yLnAM+Rq4KgogDAyIlwDnRFEMvs0U39Y03Aie9UaMQCyAiPbQDx7Chq0mpUooCLe6lDrSTrlugram+I=]'
+        #rndc_conf_file: 'present'
+exec:
+  'Modify ownership and permissions':
+    command: 'chown -R root /var/named/ /var/run/named && chmod 775 /var/run/named'
+    path: '/usr/bin:/bin'
+    notify: Service[named]
+    onlyif: 'stat --format "%U" /var/named/dynamic |grep named'

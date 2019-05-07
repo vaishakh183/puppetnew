@@ -1,0 +1,17 @@
+---
+ensure_default_firewall: false
+ntp::servers:
+  - '0.us.pool.ntp.org iburst'
+  - '1.us.pool.ntp.org iburst'
+  - '0.pool.ntp.org iburst'
+  - '1.pool.ntp.org iburst'
+
+ntp::restrict:
+  - 'default kod nomodify notrap nopeer noquery'
+  - '-6 default kod nomodify notrap nopeer noquery'
+  - '127.0.0.1'
+  - '172.17.0.0 mask 255.255.224.0 nomodify notrap nopeer'
+  - '172.18.0.0 mask 255.255.224.0 nomodify notrap nopeer'
+  - '10.86.192.0 mask 255.255.192.0 nomodify notrap nopeer'
+
+ntp::logfile: '/var/log/ntp.log'

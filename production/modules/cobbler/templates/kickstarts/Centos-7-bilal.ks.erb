@@ -1,0 +1,546 @@
+#version=RHEL7
+# System authorization information
+auth --enableshadow --passalgo=sha512
+
+# Use network installation
+url --url=$tree
+# Use text install
+text
+# Run the Setup Agent on first boot
+firstboot --disabled
+#ignoredisk --only-use=sda
+# Keyboard layouts
+keyboard us
+# System language
+lang en_US
+
+# Network information
+# network  --bootproto=dhcp --device=ens32 --onboot=off --ipv6=auto
+# network  --hostname=localhost.localdomain
+# $SNIPPET('network_config')
+# Root password is 'P@ssw0rd'
+rootpw --iscrypted $6$.T9z/jK8asWHJdVh$U724b2mXvv1sHc.J8KknYHk4FR9JbBSfUFRQekoVTUby973oFwPVwEOLpVbAALvdNpbeQ6HVKu.kqMF/EtVzj/
+selinux --disabled
+# System timezone
+timezone Etc/GMT
+# Clear the Master Boot Record
+zerombr
+# System bootloader configuration
+#bootloader --append=" crashkernel=auto net.ifnames=0 biosdevname=0" --location=mbr --boot-drive=sda
+# Partition clearing information
+#bootloader --location=mbr --append="net.ifnames=0 biosdevname=0 crashkernel=auto"
+#clearpart --all --initlabel
+#part /boot --fstype ext4 --size=500 --ondisk sda
+#part swap --size 4096 --ondisk sda
+#part / --fstype ext4 --size 1000 --grow --ondisk sda
+
+#bootloader --append=" crashkernel=auto net.ifnames=0 biosdevname=0" --location=mbr --boot-drive=sda
+#clearpart --all --initlabel
+#part / --fstype ext4 --size=51200 --ondisk sda
+#part /home --fstype ext4 --size=102400 --ondisk sda
+#part /var --fstype ext4 --size=81920 --ondisk sda
+#part /var/log --fstype ext4 --size=153600 --ondisk sda
+#part /var/log/audit --fstype ext4 --size=81920 --ondisk sda
+#part /tmp --fstype ext4 --size=49152 --ondisk sda
+#part /var/tmp --fstype ext4 --size=49152 --ondisk sda
+#part /dev/shm --fstype ext4 --size=49152 --ondisk sda
+#part pv.01 --size=10240 --grow --ondisk sda
+#volgroup vg01 pv.01
+#logvol /var/lib/libvirt/images --vgname=vg01 --name=lv01 --fstype ext4 --size=1024 --grow
+bootloader --append=" crashkernel=auto net.ifnames=0 biosdevname=0" --location=mbr
+clearpart --all --initlabel
+part /home --fstype ext4 --size=142848
+part /var --fstype ext4 --size=142848
+part /var/log --fstype ext4 --size=47616
+part /var/log/audit --fstype ext4 --size=4762
+part /tmp --fstype ext4 --size=6554
+part /var/tmp --fstype ext4 --size=13108
+#part /dev/shm --fstype ext4 --size=65540
+part /boot --fstype ext4 --size=1024
+part swap --size=4096
+part / --fstype ext4 --size=1000 --grow
+#part pv.01      --size=1000     --grow  --ondisk=sdb
+#volgroup vg00 pv.01
+#logvol  /var/lib/libvirt/images --vgname=vg00  --fstype=ext4  --size=2048  --grow --name=lv_data
+
+
+# disable unwanted services:
+services --disabled atd,autofs,avahi-daemon,cups,firstboot,gpm,ip6tables,kudzu,lvm2-monitor,mcstrans,mdmonitor,netfs,nfs,nfslock,portmap,readahead_early,restorecond,rpcgssd,rpcidmapd
+# If any cobbler repo definitions were referenced in the kickstart profile, include them here.
+$yum_repo_stanza
+
+%pre
+#$SNIPPET('log_ks_pre')
+#$kickstart_start
+# Enable installation monitoring
+#$SNIPPET('pre_anamon')
+#$SNIPPET('pre_install_network_config')
+%end
+
+%packages
+@core
+kexec-tools
+net-tools
+-ed
+-selinux-policy-targeted
+-vim-minimal
+-policycoreutils
+-setools
+-setserial
+-dhcpv6-client
+-centos-release-notes
+rsyslog
+
+# Group: Base
+-cyrus-sasl-plain
+-mailcap
+acl
+-ksh
+-nss_ldap
+-krb5-workstation
+-mcelog
+-aspell-en
+-stunnel
+-words
+-apmd
+-coolkey
+-coolkey-devel
+-aspell
+-vconfig
+-sendmail
+-rdate
+-pcmciautils
+-pam_ccreds
+-pam_smb
+-pam_pkcs11
+-conman
+-pkinit-nss
+-microcode_ctl
+-sysreport
+-mkbootdisk
+-pam_passwdqc
+-ypbind
+-oddjob
+-mtools
+-specspo
+-rsh
+-ipsec-tools
+-rp-pppoe
+-pm-utils
+-pam_krb5
+-irda-utils
+-amtu
+-cryptsetup-luks
+-wireless-tools
+-ccid
+-tcsh
+-anacron
+-eject
+-bluez-utils
+-logwatch
+-usbutils
+-gnupg
+-talk
+-yum-updatesd
+sos
+dos2unix
+gpm
+mtr
+tree
+sudo
+jwhois
+nc
+x86info
+
+# Group: editors
+vim-enhanced
+
+# Group: System Tools
+nmap
+ntp
+screen
+iptraf
+lsscsi
+mc
+sysstat
+
+# Group: Text-based Internet
+tftp
+lynx
+elinks
+wget
+lftp
+rsync
+
+# Group: admin-tools:
+# system-config-network-tui
+
+# Group: Development Tools
+autoconf
+automake
+binutils
+gcc
+gdb
+libtool
+make
+strace
+ltrace
+
+# Group: Applications/Databases
+
+# Group: System Environment/Daemons
+xinetd
+
+# Other packages:
+
+# Group: System Environment/Kernel
+
+# Group: Development/Languages
+perl
+-ruby
+-ruby-libs.x86_64
+-ruby-devel.x86_64
+-rubygems
+-rubygem-rspec
+-puppet
+-facter
+-augeas-libs
+-ruby-augeas
+-ruby-shadow
+
+# Group: System Environment/Base
+-OpenIPMI
+-OpenIPMI-tools
+-man
+-info
+
+# don't want this junk:
+-dbus
+-cups
+-cups-libs
+-mysql
+-iscsi-initiator-utils
+
+%end
+
+# Post-install stuff:
+%post
+
+#$SNIPPET('log_ks_post')
+
+# now we can create a separate dir. to log to
+test -d /var/log/kickstart || mkdir /var/log/kickstart
+
+$SNIPPET('correct_drive_labels_normal')
+
+echo -e "\nRunning Post Installation Script\n"
+
+# Start yum configuration
+$yum_config_stanza
+# End yum configuration
+$SNIPPET('epel7_repo_config')
+$SNIPPET('misc_pci')
+#$SNIPPET('post_install_kernel_options')
+#SNIPPET('omsa')
+#$SNIPPET('koan_environment')
+# Enable post-install boot notification
+#$SNIPPET('post_anamon')
+# $SNIPPET('post_install_network_config')
+# TODO: REMEMBER TO ADD DISK CACHE DISABLING SCRIPT LATER
+# Start final steps
+$kickstart_done
+# End final steps
+
+reboot
+
+%end
+[aashish.c@cobbler-gpx-mum kickstarts]$ cat Centos-7-bilal.ks
+#version=RHEL7
+# System authorization information
+auth --enableshadow --passalgo=sha512
+
+# Use network installation
+url --url=$tree
+# Use text install
+text
+# Run the Setup Agent on first boot
+firstboot --disabled
+#ignoredisk --only-use=sda
+# Keyboard layouts
+keyboard us
+# System language
+lang en_US
+
+# Network information
+# network  --bootproto=dhcp --device=ens32 --onboot=off --ipv6=auto
+# network  --hostname=localhost.localdomain
+# $SNIPPET('network_config')
+# Root password is 'P@ssw0rd'
+rootpw --iscrypted $6$.T9z/jK8asWHJdVh$U724b2mXvv1sHc.J8KknYHk4FR9JbBSfUFRQekoVTUby973oFwPVwEOLpVbAALvdNpbeQ6HVKu.kqMF/EtVzj/
+selinux --disabled
+# System timezone
+timezone Etc/GMT
+# Clear the Master Boot Record
+zerombr
+# System bootloader configuration
+#bootloader --append=" crashkernel=auto net.ifnames=0 biosdevname=0" --location=mbr --boot-drive=sda
+# Partition clearing information
+#bootloader --location=mbr --append="net.ifnames=0 biosdevname=0 crashkernel=auto"
+
+bootloader --location mbr --driveorder sda --append="net.ifnames=0 biosdevname=0 crashkernel=auto"
+
+clearpart --all  --drives sda --initlabel
+
+#boot
+#part raid.01 --size 10240 --ondisk sda --asprimary
+#part raid.02 --size 10240 --ondisk sdb --asprimary
+
+#part raid.05 --size 10240 --ondisk sda --asprimary
+#part raid.06 --size 10240 --ondisk sdb --asprimary
+
+#physical volumes
+#part raid.03 --size 200 --ondisk sda --asprimary --grow
+#part raid.04 --size 200 --ondisk sdb --asprimary --grow
+
+#raid /boot --fstype xfs --level 10 --device md0 raid.01 raid.02
+#raid / --fstype xfs  --level 10 --device md1 raid.03 raid.04
+#raid swap --fstype swap --level 10 --device swap raid.05 raid.06
+
+#volume group
+part biosboot --fstype=biosboot --size=1
+
+part /boot --fstype xfs --size=1024 --ondisk sda
+part pv.01 --fstype xfs --size=1000 --grow --ondisk=sda
+
+volgroup vg01 pv.01
+
+logvol /    --fstype xfs --name=lv01 --vgname=vg01 --size=20480
+logvol /home    --fstype xfs --name=lv02 --vgname=vg01 --size=20480
+logvol /var    --fstype xfs --name=lv03 --vgname=vg01 --size=102400
+logvol /var/log    --fstype xfs --name=lv04 --vgname=vg01 --size=20480
+logvol /var/log/audit    --fstype xfs --name=lv05 --vgname=vg01 --size=20480
+logvol /tmp    --fstype xfs --name=lv06 --vgname=vg01 --size=15980
+logvol /var/tmp    --fstype xfs --name=lv07 --vgname=vg01 --size=15980
+
+#bootloader --append=" crashkernel=auto net.ifnames=0 biosdevname=0" --location=mbr --boot-drive=sda
+#clearpart --all --initlabel
+#part / --fstype ext4 --size=51200 --ondisk sda
+#part /home --fstype ext4 --size=102400 --ondisk sda
+#part /var --fstype ext4 --size=81920 --ondisk sda
+#part /var/log --fstype ext4 --size=153600 --ondisk sda
+#part /var/log/audit --fstype ext4 --size=81920 --ondisk sda
+#part /tmp --fstype ext4 --size=49152 --ondisk sda
+#part /var/tmp --fstype ext4 --size=49152 --ondisk sda
+#part /dev/shm --fstype ext4 --size=49152 --ondisk sda
+#part pv.01 --size=10240 --grow --ondisk sda
+#volgroup vg01 pv.01
+#logvol /var/lib/libvirt/images --vgname=vg01 --name=lv01 --fstype ext4 --size=1024 --grow
+#bootloader --append=" crashkernel=auto net.ifnames=0 biosdevname=0" --location=mbr --boot-drive=sda
+#clearpart --all --initlabel
+#part /home --fstype ext4 --size=47104 --ondisk sda
+#part /var --fstype ext4 --size=119040 --ondisk sda
+#part /var/log --fstype ext4 --size=95232 --ondisk sda
+#part /var/log/audit --fstype ext4 --size=4762 --ondisk sda
+#part /tmp --fstype ext4 --size=6144 --ondisk sda
+#part /var/tmp --fstype ext4 --size=6144 --ondisk sda
+#part /dev/shm --fstype ext4 --size=6144 --ondisk sda
+#part / --fstype ext4 --size=5120 --grow --ondisk sda
+#part /boot --fstype ext4 --size=1000 --ondisk sda
+#part swap --size=4000 --ondisk sda
+#part / --fstype ext4 --size=1000 --grow --ondisk sda
+#part pv.01      --size=1000     --grow  --ondisk=sdb
+#volgroup vg00 pv.01
+#logvol  /var/lib/libvirt/images --vgname=vg00  --fstype=ext4  --size=2048  --grow --name=lv_data
+
+
+# disable unwanted services:
+services --disabled atd,autofs,avahi-daemon,cups,firstboot,gpm,ip6tables,kudzu,lvm2-monitor,mcstrans,mdmonitor,netfs,nfs,nfslock,portmap,readahead_early,restorecond,rpcgssd,rpcidmapd
+# If any cobbler repo definitions were referenced in the kickstart profile, include them here.
+$yum_repo_stanza
+
+%pre
+#$SNIPPET('log_ks_pre')
+#$kickstart_start
+# Enable installation monitoring
+#$SNIPPET('pre_anamon')
+#$SNIPPET('pre_install_network_config')
+%end
+
+%packages
+@core
+kexec-tools
+net-tools
+-ed
+-selinux-policy-targeted
+-vim-minimal
+-policycoreutils
+-setools
+-setserial
+-dhcpv6-client
+-centos-release-notes
+rsyslog
+
+# Group: Base
+-cyrus-sasl-plain
+-mailcap
+acl
+-ksh
+-nss_ldap
+-krb5-workstation
+-mcelog
+-aspell-en
+-stunnel
+-words
+-apmd
+-coolkey
+-coolkey-devel
+-aspell
+-vconfig
+-sendmail
+-rdate
+-pcmciautils
+-pam_ccreds
+-pam_smb
+-pam_pkcs11
+-conman
+-pkinit-nss
+-microcode_ctl
+-sysreport
+-mkbootdisk
+-pam_passwdqc
+-ypbind
+-oddjob
+-mtools
+-specspo
+-rsh
+-ipsec-tools
+-rp-pppoe
+-pm-utils
+-pam_krb5
+-irda-utils
+-amtu
+-cryptsetup-luks
+-wireless-tools
+-ccid
+-tcsh
+-anacron
+-eject
+-bluez-utils
+-logwatch
+-usbutils
+-gnupg
+-talk
+-yum-updatesd
+sos
+dos2unix
+gpm
+mtr
+tree
+sudo
+jwhois
+nc
+x86info
+
+# Group: editors
+vim-enhanced
+
+# Group: System Tools
+nmap
+ntp
+screen
+iptraf
+lsscsi
+mc
+sysstat
+
+# Group: Text-based Internet
+tftp
+lynx
+elinks
+wget
+lftp
+rsync
+
+# Group: admin-tools:
+# system-config-network-tui
+
+# Group: Development Tools
+autoconf
+automake
+binutils
+gcc
+gdb
+libtool
+make
+strace
+ltrace
+
+# Group: Applications/Databases
+
+# Group: System Environment/Daemons
+xinetd
+
+# Other packages:
+
+# Group: System Environment/Kernel
+
+# Group: Development/Languages
+perl
+-ruby
+-ruby-libs.x86_64
+-ruby-devel.x86_64
+-rubygems
+-rubygem-rspec
+-puppet
+-facter
+-augeas-libs
+-ruby-augeas
+-ruby-shadow
+
+# Group: System Environment/Base
+-OpenIPMI
+-OpenIPMI-tools
+-man
+-info
+
+# don't want this junk:
+-dbus
+-cups
+-cups-libs
+-mysql
+-iscsi-initiator-utils
+
+%end
+
+# Post-install stuff:
+%post
+
+#$SNIPPET('log_ks_post')
+
+# now we can create a separate dir. to log to
+test -d /var/log/kickstart || mkdir /var/log/kickstart
+
+$SNIPPET('correct_drive_labels_normal')
+
+echo -e "\nRunning Post Installation Script\n"
+
+# Start yum configuration
+$yum_config_stanza
+# End yum configuration
+$SNIPPET('epel7_repo_config')
+$SNIPPET('misc_pci')
+$SNIPPET('post_install_kernel_options')
+#$SNIPPET('post_install_kernel_options')
+#SNIPPET('omsa')
+#$SNIPPET('koan_environment')
+# Enable post-install boot notification
+#$SNIPPET('post_anamon')
+# $SNIPPET('post_install_network_config')
+# TODO: REMEMBER TO ADD DISK CACHE DISABLING SCRIPT LATER
+# Start final steps
+$kickstart_done
+# End final steps
+
+reboot
+
+%end

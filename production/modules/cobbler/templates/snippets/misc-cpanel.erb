@@ -1,0 +1,32 @@
+#raw
+
+test -d /usr/local/scripts || mkdir /usr/local/scripts
+
+# create the flags dir for flagging various steps of the installation/firstboot process
+test -d /var/log/kickstart/flags || mkdir -p /var/log/kickstart/flags
+test -d /var/log/kickstart/firstboot/flags || mkdir -p /var/log/kickstart/firstboot/flags
+
+# Get all the scripts depending on the type of server we're installing
+
+( rsync -azp gitlab.inbom1.webhostbox.net::linux-hosting/cpanel-scripts/ /usr/local/scripts/ || export status="fail" ) &&  /usr/local/scripts/set_repo_perms.sh &>/dev/null
+
+if [ "$status" = "fail" ] ; then
+        logger -p "local0.emerg" -f "/var/log/kickstart-post-install.log" -t "[install-cpanel.sh]" "rsync of /usr/local/scripts failed. Aborting firstboot process."
+        exit 1
+else
+
+        echo "time sh /usr/local/scripts/firstboot/00-firstboot.sh >> /var/log/kickstart/firstboot/firstboot.log 2>&1" >> /etc/rc.local
+
+fi
+
+# disable disk caches
+sh /usr/local/scripts/disable-disk-caches.sh > /var/log/kickstart/disable-disk-caches.sh.log 2>&1
+
+# ftp's just in case puppet can't do it, firstboot scripts need some more gems
+gem install ftpfxp
+# yum install -y rubygem-mail
+
+chmod 1777 /tmp
+
+#end raw
+

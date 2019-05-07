@@ -1,0 +1,39 @@
+#raw
+
+# # set the system time:
+echo -e "syncing system time with NTP server.\n"
+ntpdate pool.ntp.org && hwclock --systohc
+
+## Make our working environment a bit friendlier:
+echo -e "modifying vimrc and bashrc...\n"
+/bin/grep -q smartindent /etc/vimrc || echo "set smartindent" >> /etc/vimrc
+/bin/grep -q 'alias.*vim' /etc/bashrc || echo "alias vi='vim'" >> /etc/bashrc
+
+# enable bash history timestamping:
+/bin/grep -q HISTTIMEFORMAT /etc/bashrc || echo HISTTIMEFORMAT=\'      %d-%m-%Y, %H:%M:%S      \' >> /etc/bashrc
+
+## update the system:
+echo -e "Updating the system..\n"
+
+# disable troublesome unwanted packages:
+yum makecache && yum update -y --exclude libselinux-ruby
+
+## install some useful packages we need:
+yum install -y bash-completion
+
+# disable mail spool creation
+sed -i 's/CREATE_MAIL_SPOOL=yes/CREATE_MAIL_SPOOL=no/' /etc/default/useradd
+
+# puppet config
+sed -i 's/^#PUPPET/PUPPET/g' /etc/sysconfig/puppet
+sed -i 's/puppet$/puppetmaster.directi.com/' /etc/sysconfig/puppet
+sed -i 's/--waitforcert=500/"--verbose"/g' /etc/sysconfig/puppet
+sed -i 's/ssl$/ssl\n\n\tpluginsync = true\n/' /etc/puppet/puppet.conf
+echo "server = puppetmaster.directi.com" >> /etc/puppet/puppet.conf
+
+# finally, disable dag repo as we don't want 3rd party repos on our servers permanently.
+sed -i 's/enabled.*1/enabled=0/' /etc/yum.repos.d/rpmforge.repo
+yum makecache
+
+#end raw
+

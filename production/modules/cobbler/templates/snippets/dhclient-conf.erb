@@ -1,0 +1,11 @@
+#raw
+
+cat << \EOF >> /etc/dhcp/dhclient-$(netstat -ie | grep -B1 "172.*.215.*" | head -n1 | awk '{print $1}').conf
+#send vendor-class-identifier "anaconda-Linux 2.6.32-431.el6.x86_64 x86_64";
+#timeout 45;
+option classless-routes code 121 = array of unsigned integer 8;
+request;
+EOF
+
+#end raw
+

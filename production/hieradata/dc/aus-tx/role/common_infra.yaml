@@ -1,0 +1,11 @@
+---
+services:
+  'iptables':
+    ensure: 'running'
+    enable: 'true'
+  'ip6tables':
+    ensure: 'running'
+    enable: 'true'
+  'firewalld':
+    ensure: 'running'
+    enable: 'true'

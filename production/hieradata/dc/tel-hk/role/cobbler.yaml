@@ -1,0 +1,47 @@
+---
+cobbler::repos:
+  sysad-el7:
+    mirror: 'https://pulp-hk.india.endurance.com/pulp/repos/sysad-el7_x86_64/'
+  sysad-el6:
+    mirror: 'https://pulp-hk.india.endurance.com/pulp/repos/sysad-el6_x86_64/'
+  sysad-el5:
+    mirror: 'https://pulp-hk.india.endurance.com/pulp/repos/sysad-el5_x86_64/'
+  hosting-backup-el6:
+    mirror: 'https://pulp-hk.india.endurance.com/pulp/repos/hosting-backup-rhl6-x86_64/'
+  hosting-custom-el6:
+    mirror: 'https://pulp-hk.india.endurance.com/pulp/repos/hosting-custom-rhl6-86_64/'
+  hosting-custom-el5:
+    mirror: 'https://pulp-hk.india.endurance.com/pulp/repos/hosting-custom-rhel5-x86_64/'
+  obox-el6:
+    mirror: 'https://pulp-hk.india.endurance.com/pulp/repos/obox-6-x86_64/'
+  obox-el7:
+    mirror: 'https://pulp-hk.india.endurance.com/pulp/repos/obox-7-x86_64/'
+  
+cobbler::dhcp_subnets:
+  172.25.215.0/255.255.255.0:
+    - pool_type:  'bootp'
+      range_low:  172.25.215.100
+      range_high: 172.25.215.200
+      max-lease-tigme: 3600
+      default-lease-time: 3600
+      nameservers:
+        - 172.25.40.14
+      next-server: 172.25.215.254
+      filename: 'pxelinux.0'
+  172.25.161.0/255.255.255.192:
+    - pool_type:  'bootp'
+      range_low:  172.25.161.10
+      range_high: 172.25.161.60
+      max-lease-tigme: 3600
+      default-lease-time: 3600
+      nameservers:
+        - 172.25.160.36
+      next-server: 172.25.215.254
+      filename: 'pxelinux.0'
+
+tcpwrappers::allow:
+  'allow_tftp':
+    client_list: ['172.25.215.0/255.255.255.0','172.25.40.18']
+    daemon_list: ['in.tftpd']
+    order: '21_ftp_all'
+    comment: 'Allow private subnet for FTP access on this server'

@@ -1,0 +1,25 @@
+---
+packages:
+  iptables-services:
+    ensure: 'present'
+
+services:
+  'iptables':
+    ensure: 'stopped'
+    enable: 'false'
+    require: Package[iptables-services]
+  'ip6tables':
+    ensure: 'stopped'
+    enable: 'false'
+    require: Package[iptables-services]
+  'firewalld':
+    ensure: 'stopped'
+    enable: 'false'
+
+profile::accounts::ldap_sync::included_users:
+  - randrzejewski
+  - jjmichau
+  - jwillie
+  - pmarcotte
+  - ryan
+  - gcohoe

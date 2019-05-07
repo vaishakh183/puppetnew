@@ -1,0 +1,13 @@
+---
+
+hosts::host_entries:
+  'pulp-austin.india.endurance.com':
+    ip: '10.86.218.3'
+
+
+tcpwrappers::default_deny: false
+
+package:
+ nagios-custom-base-checks:
+    ensure: 'latest'
+

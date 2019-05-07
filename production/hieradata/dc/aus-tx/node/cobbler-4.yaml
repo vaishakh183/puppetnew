@@ -1,0 +1,12 @@
+---
+cobbler::dhcp_subnets:
+  172.17.215.0/255.255.255.0:
+     - pool_type:  'bootp'
+       range_low:  172.17.215.100
+       range_high: 172.17.215.200
+       max-lease-tigme: 3600
+       default-lease-time: 3600
+       nameservers:
+         - 172.17.40.70
+       next-server: 172.17.215.250
+       filename: 'pxelinux.0'

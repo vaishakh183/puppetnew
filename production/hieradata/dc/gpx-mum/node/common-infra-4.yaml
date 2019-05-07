@@ -1,0 +1,225 @@
+---
+network::interfaces:
+  'eth0':
+    ipv6init: 'no'
+    onboot: 'yes'
+    nm_controlled: 'no'
+    bootproto: 'static'
+    bridge: 'br0'
+    zone: 'public'
+  'br0':
+    onboot: 'yes'
+    nm_controlled: 'no'
+    type: 'Bridge'
+    bootproto: 'static'
+    linkdelay: '0'
+    ipaddr: '172.23.40.15'
+    netmask: '255.255.255.0'
+    gateway: '172.23.40.1'
+    zone: 'public'
+  'eth0.215':
+    ipv6init: 'no'
+    onboot: 'yes'
+    nm_controlled: 'no'
+    bootproto: 'static'
+    bridge: 'br0.215'
+    vlan: 'yes'
+    zone: 'public'
+  'br0.215':
+    onboot: 'yes'
+    nm_controlled: 'no'
+    type: 'Bridge'
+    bootproto: 'static'
+    linkdelay: '0'
+    zone: 'public'
+  'eth0.1':
+    ipv6init: 'no'
+    onboot: 'yes'
+    nm_controlled: 'no'
+    bootproto: 'static'
+    bridge: 'br0.1'
+    vlan: 'yes'
+    zone: 'public'
+  'br0.1':
+    onboot: 'yes'
+    nm_controlled: 'no'
+    type: 'Bridge'
+    bootproto: 'static'
+    linkdelay: '0'
+    zone: 'public'
+  'eth0.103':
+    ipv6init: 'no'
+    onboot: 'yes'
+    nm_controlled: 'no'
+    bootproto: 'static'
+    bridge: 'br0.103'
+    vlan: 'yes'
+    zone: 'public'
+  'br0.103':
+    onboot: 'yes'
+    nm_controlled: 'no'
+    type: 'Bridge'
+    bootproto: 'static'
+    linkdelay: '0'
+    zone: 'public'
+
+vkick::host::vnc_listen: '0.0.0.0'
+
+kvm::domains:
+  'ns-4.gpx-mum.colo':
+    vcpu: '2'
+    ram: '4096'
+    disk_size: '130'
+    bridge_device: 'br0.215'
+    mac: '4e:a6:bb:64:17:7f'
+    os_variant: 'rhel7'
+    vnc_password: ENC[PKCS7,MIIBeQYJKoZIhvcNAQcDoIIBajCCAWYCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEAfH26l0kvcaoWuaWo5z3eO0yreKe6HWcXTxBlv8biJhwqcty93UELl3mO0vHdcXOhU9UKP88O/PCT5dBgsjTPXRiSN5Y8wMQDoynHy/HqzhcsBF7SWugDHQ3FgbyXUWvRehXB2bg9Y7QkuRMnGRNhM4kUZyTaUhDFMSWgfvS81n+LBugueEwY7V6TgKwyKhHh/tu2kipqjYXJ+HckMoeLpLKRHPEftraY9XlKLXZg3yPQCoPmlKv9X2/pQy855a9tFzvNwSC+jD+Pla1NFhfflpz9mpf9GaHNH5ivARS3WbrXc4rnaWu6urHReYX3xIHpn2SIisH9ZmZYDh+zH7Hc7jA8BgkqhkiG9w0BBwEwHQYJYIZIAWUDBAEqBBDqBz+kIXkParJ4f4aIFhNagBCr4z5X/oudCFSIzp8pzU+2] 
+    vnc_port: '5915'
+  'sentinel-4.gpx-mum.colo':
+    vcpu: '4'
+    ram: '6144'
+    disk_size: '400'
+    bridge_device: 'br0.215'
+    mac: '92:f3:d1:5b:20:22'
+    os_variant: 'rhel7'
+    vnc_password: ENC[PKCS7,MIIBeQYJKoZIhvcNAQcDoIIBajCCAWYCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEAOk+nHw9UwOm09l5jEbSQ5X61Sh24Y2HgGf0kCcz22/rVuN2aDauQTMjZueLfC/jVQtwR5Fu14FWhcX3mNSwiegNdqQsuPNxCPAK3X+XCmqdyOPeY21xU2tcypRMp+xL/ye5ZENIki4uPGjGHoW0d7isSCoYhUzN1Jfce72Fx/UcTmsDMGxrJHEAq+hhyTdBLKYZ6aDhJKOHtrs7YRWgkbJhMChAEAKEuoGuB3Ho14ZJSD7RNzJeAXE8Wur27NWKkB5LyY8e+CUE5Pb/j9Kcvy2HmyDObMe16M0N0O/6lPWHEWW5W11UWDKrEMITeMuYVg3lg+6Kwy/kcg3DZujlaeTA8BgkqhkiG9w0BBwEwHQYJYIZIAWUDBAEqBBACnX9mD6m14KS+eeIrDPUYgBBJWUjLBXy47cMnwyPdeEIY]
+    vnc_port: '5916'
+  'cobbler-4.gpx-mum.colo':
+    vcpu: '2'
+    ram: '3072'
+    disk_size: '200'
+    bridge_device: 'br0.215'
+    mac: 'e6:34:b4:22:ca:d4'
+    os_variant: 'rhel7'
+    vnc_password: ENC[PKCS7,MIIBeQYJKoZIhvcNAQcDoIIBajCCAWYCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEAQgEgiFiqUybxz8voMJSxjEhf8xoRa6YHEEfCWNXkmUcdVbShDPysyWKCTyJrGwJBlgA4ZDhheDiZ+Ccop51Q5gCONinB65qqlIsF2gkc2sI+ayq0FVc0NwW5PwsSB+1hIPWbNaqNOQtfwxfIYVpTfwxdmY529RUFznVWBwFyjFFnhXC4QQX2yC4Lha6h2GJQ2TovYB1ypyubaFQ9fIUB4ngJvXo5KbWW1TG54RgIqxVvbnkB6tuuHD14+49ivYU5aD3LoVHYOa9fXyAiHXNJ2CcbJdNeSt50zbmn543cmj3QdJzI5ebP5mzFCLaK1qLfVf4g5Ht2RIajnwnoRhWQGTA8BgkqhkiG9w0BBwEwHQYJYIZIAWUDBAEqBBBt1MV/pWt7JaRoQ2AcsFE4gBBUm+qbLdtOITeuf6H2wpVE]
+    vnc_port: '5917'
+  'ntp-4.gpx-mum.colo':
+    vcpu: '1'
+    ram: '2048'
+    disk_size: '50'
+    bridge_device: 'br0.215'
+    mac: '2a:4b:d5:f5:6b:0a'
+    os_variant: 'rhel7'
+    vnc_password: ENC[PKCS7,MIIBeQYJKoZIhvcNAQcDoIIBajCCAWYCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEASfu0Jcff+CqUYn9vs6HFJndvtCGznooVdW1dGg9e8a6qWOktDHDStJFppi72aZ//P56sekmDqH6ny9KEn+PGOynX+9azEfyy2CoIgKwhTMOd9t7uhKbIQRgggi7xVfDHDt+DIgg0//gSEKXJ7thiPuii2ZMPLD6TQCrs0NTarKQaWwzxd7/bdMZorHljZH+42SCH76eszvvA4tzjVBxUGng7NcYEUS0UcsqxdM0zYR0OWq5ZMt63E50XmjxgSkMojhaZI1IpEcKj5KBAnNdgoY4vOh/vIa6dC14FgB25b2cmmAhu67mJOGPfTxdG6tTNOtggeDITj5gFjm+Xv2A/oTA8BgkqhkiG9w0BBwEwHQYJYIZIAWUDBAEqBBDSU2JjtNY6AyA+FAj8Zh9igBCn4gPPcKsnK7hQQMd5gLeY]
+    vnc_port: '5918'
+
+firewall_chains:
+  INPUT:filter:IPv4:
+    purge: true
+    policy: 'drop'
+  FORWARD:filter:IPv4:
+    purge: true
+    policy: 'drop'
+
+firewall_rules:
+  drop_all_traffic:
+    name: '999 Drop all traffic'
+    iniface: 'eth1'
+    proto: 'all'
+    action: 'drop'
+  allow_related_established:
+    name: '900 allow RELATED and ESTABLISHED connections'
+    proto: 'all'
+    state: ['RELATED', 'ESTABLISHED']
+    action: 'accept'
+  allow_localhost:
+    name: '901 allow localhost'
+    proto: 'all'
+    iniface: 'lo'
+    action: 'accept'
+  allow_br0:
+    name: '902 allow br0'
+    proto: 'all'
+    iniface: 'br0'
+    action: 'accept'
+  allow_br0.1:
+    name: '903 allow br0.1'
+    proto: 'all'
+    iniface: 'br0.1'
+    action: 'accept'
+  allow_br0.215:
+    name: '904 allow br0.215'
+    proto: 'all'
+    iniface: 'br0.215'
+    action: 'accept'
+  allow_icmp:
+    name: '905 allow ICMP'
+    proto: 'icmp'
+    action: 'accept'
+  allow_ssh1:
+    name: '906 allow ssh from office network - Bangalore Private IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '172.27.0.0/18'
+    action: 'accept'
+  allow_ssh2:
+    name: '907 allow ssh from office network - Mumbai Private IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '172.16.128.0/18'
+    action: 'accept'
+  allow_ssh3:
+    name: '908 allow ssh from office network - Bangalore TATA Public IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '115.110.71.146/30'
+    action: 'accept'
+  allow_ssh4:
+    name: '909 allow ssh from office network - Bangalore Vodaphone Public IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '122.15.181.197/30'
+    action: 'accept'
+  allow_ssh5:
+    name: '910 allow ssh from office network - Mumbai TATA Public IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '115.110.127.198'
+    action: 'accept'
+  allow_ssh6:
+    name: '911 allow ssh from office network - Mumbai Vodaphone Public IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '122.15.255.69'
+    action: 'accept'
+  allow_ssh7:
+    name: '912 allow ssh from office network - Mumbai TATA DMZ Public IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '115.110.126.72/29'
+    action: 'accept'
+  allow_ssh8:
+    name: '913 allow ssh from office network - Mumbai Vodaphone DMZ Public IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '122.15.251.40/29'
+    action: 'accept'
+  allow_ssh9:
+    name: '914 allow ssh from office network - Mumbai Airtel Public IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '182.74.165.114'
+    action: 'accept'
+  allow_ssh10:
+    name: '915 allow ssh from office network - Mumbai Airtel DMZ Public IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '182.75.162.112/29'
+    action: 'accept'
+  allow_ssh11:
+    name: '916 allow ssh from office network - Mumbai Airtel DMZ Public IP'
+    proto: 'tcp'
+    iniface: 'eth1'
+    dport: '22'
+    source: '182.75.162.88/29'
+    action: 'accept'

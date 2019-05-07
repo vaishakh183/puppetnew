@@ -1,0 +1,57 @@
+---
+files:
+  '/mnt':
+    ensure: 'present'
+    owner: 'root'
+    group: 'apache'
+    mode: '2775'
+  '/mnt/rpms':
+    ensure: 'directory'
+    group: 'apache'
+    mode: '2775'
+  '/mnt/tmp':
+    ensure: 'directory'
+    group: 'apache'
+    mode: '2775'
+  '/etc/httpd/conf.d/pulp_upload1.conf':
+    ensure: 'present'
+    source: 'puppet:///modules/profile/pulp/pulp_upload1.conf'
+    notify: Service[httpd]
+  '/mnt/upload.py':
+    ensure: 'present'
+    source: 'puppet:///modules/profile/pulp/upload.py'
+    mode: '775'
+    group: 'apache'
+  '/mnt/index.py':
+    ensure: 'present'
+    source: 'puppet:///modules/profile/pulp/index.py'
+    mode: '775'
+    group: 'apache'
+  '/opt/scripts/sync.py':
+    ensure: 'present'
+    source: 'puppet:///modules/profile/pulp/sync.py'
+    mode: '775'
+    group: 'apache'
+
+users:
+  backup:
+    ensure: 'present'
+    home: '/home/backup'
+    groups: ['backup','apache']
+    sshkeys: ['ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC1vtoIqnPTt9GfNj/uC1T3Eh2DoNu1qFCkuSs4/HE+l0w2vHefajDzW3lK8aoSnzmkFD6JnH340rcIQYE6Bxjoucl6wdLUwTWNN9ECDE7N6K333qNkEfUz1nYYuu2LC6hWGKbsXwJP7kV4GsUgdFumRoHSo9MZO7gShzlO0gtU3s9f5/xC9bYGET/Jl05GCRdLrIDVxJoseIfEUw3xZ32JlA5E2FHnkqHu53rMhTdDRj7iZCc9HTPtT2SHgd+cECZQkD5UDSbj6QfXh4UxrbUZ2VTjsgoNIqEhwybEih6k97GAOv3G2bec26FVKeGyqGP43bKreEcCUywseLGC+c7L backup@pulp-pci-2.aus-tx.colo']
+
+crons:
+  'Clean files under /mnt/tmp':
+    command: '/usr/bin/rm -rf /mnt/tmp/*'
+    user: 'root'
+    minute: '0'
+    hour: '0'
+    weekday: '0'
+
+hosts::host_entries:
+  'inmu.corp.endurance.com':
+    ip: '172.16.189.99'
+
+packages:
+  'mod_ldap':
+    ensure: 'installed'

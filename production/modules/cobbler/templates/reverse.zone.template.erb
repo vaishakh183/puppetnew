@@ -1,0 +1,22 @@
+\$TTL 3600
+@                       IN      SOA     $cobbler_server. nobody.example.com. (
+                                        $serial   ; Serial
+                                        600         ; Refresh
+                                        1800         ; Retry
+                                        604800       ; Expire
+                                        3600          ; TTL
+                                        )
+
+                        IN      NS      $cobbler_server.
+
+
+$cname_record
+
+$host_record
+<% @records.each do |zone, rr| -%>
+<% rr.each do |host, ip| -%>
+<% if ip.include?(@name) -%>
+<%= ip.split('.').reverse.take(2).join('.') -%> IN PTR <%= host[-1] == '.' and zone or host + '.' + zone %>.;
+<% end -%>
+<% end -%>
+<% end -%>

@@ -1,0 +1,5 @@
+---
+ntp::ntp_service: 'chrony'
+ntp::admingroup: 'wheel'
+motd::message: "PluralSight Centos System\n"
+newuser: 'testuser'

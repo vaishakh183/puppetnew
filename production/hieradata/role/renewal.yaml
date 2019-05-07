@@ -1,0 +1,192 @@
+---
+hosts::host_entries:
+  'pulp.tx1-tx.colo':
+    ip: '172.17.40.50'
+
+yumrepos:
+  'ius':
+    descr: "IUS Community Packages for Enterprise Linux 7 - $basearch"
+    ensure: present
+    mirrorlist: "https://mirrors.iuscommunity.org/mirrorlist?repo=ius-centos7&arch=$basearch&protocol=http"
+    failovermethod: "priority" 
+    gpgcheck: 1
+    enabled: 1
+    gpgkey: https://dl.iuscommunity.org/pub/ius/IUS-COMMUNITY-GPG-KEY
+
+resolv_conf::nameservers:
+  - 10.0.0.2
+  - 8.8.8.8
+
+logrhythm::logrhythm_server: "108.179.255.232"
+
+users:
+  ec2-user:
+    ensure: "absent"
+  centos:
+    ensure: "absent"
+
+files:
+  '/opt/clamav':
+    ensure: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0750'
+  '/opt/clamav/quarantine':
+    ensure: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0750'
+
+ntp::servers:
+  - 0.us.pool.ntp.org iburst
+
+ensure_default_firewall: false
+
+cis::su::users: [] 
+
+cis::webnodes:
+  - 'stagingui-renewal.bigrock.in'
+  - 'stagingphp-renewal.bigrock.in'
+  - 'br1-renewal.bigrock.in'
+  - 'br2-renewal.bigrock.in'
+  - 'br3-renewal.bigrock.in'
+  - 'php1-renewal.bigrock.in'
+  - 'php2-renewal.bigrock.in'
+  - 'php3-renewal.bigrock.in'
+  - 'php4-renewal.bigrock.in'
+  - 'hg1-renewal.hostgator.in'
+  - 'hg2-renewal.hostgator.in'
+
+cis::nfsnodes:
+  - 'stagingui-renewal.bigrock.in'
+  - 'stagingphp-renewal.bigrock.in'
+  - 'br1-renewal.bigrock.in'
+  - 'br2-renewal.bigrock.in'
+  - 'br3-renewal.bigrock.in'
+  - 'php1-renewal.bigrock.in'
+  - 'php2-renewal.bigrock.in'
+  - 'php3-renewal.bigrock.in'
+  - 'hg1-renewal.hostgator.in'
+  - 'hg2-renewal.hostgator.in'
+
+packages: [php71u-pdo, php71u-mysqlnd, php71u-json, php71u-cli, php71u-xml, php71u-process, nagios-custom-base-checks, nano, zip, unzip]
+
+clamav::manage_clamd: true
+clamav::clamd_service_enable: false
+clamav::clamd_service_ensure: stopped
+clamav::manage_freshclam: true
+clamav::freshclam_options:
+ LogTime: yes
+ NotifyClamd: /etc/clamd.d/scan.conf
+
+crons:
+  freshclam:
+    command: '/usr/bin/freshclam --log=/var/log/freshclam.log'
+    hour: '00'
+    minute: '00'
+  system_scan:
+    command: 'ionice -c2 -n7 nice -n19 /usr/bin/clamscan --log=/opt/clamav/scan.log --infected --suppress-ok-results --bytecode=yes --detect-pua=yes --algorithmic-detection=yes --allmatch --recursive=yes --move /opt/clamav/quarantine/ / --exclude-dir /sys --exclude-dir /opt/clamav/quarantine --exclude="(\.amzn1.x86_64.img$|/usr/share/mime/mime.cache$)"'
+    hour: '1'
+    minute: '30'
+
+apache::mod::php::package_name: "php71u"
+apache::mod::php::php_version: '7.1'
+apache::mod::php::path: '/etc/httpd/modules/libphp7.so'
+apache::server_signature: "Off"
+apache::server_tokens: "Prod"
+apache::trace_enable: "Off"
+apache::file_e_tag: "None"
+apache::keepalive: "On"
+apache::service_restart: "/sbin/apachectl configtest && /sbin/apachectl reload"
+apache::default_vhost: false
+apache::mod::ssl::apache_version: "2.4"
+apache::mod::ssl::package_name: "mod_ssl"
+apache::mod::security::modsec_secruleengine: "Off"
+apache::default_mods:
+  - access_compat
+  - actions
+  - alias
+  - allowmethods
+  - auth_basic
+  - auth_digest
+  - authn_anon
+  - authn_core
+  - authn_dbm
+  - authn_file
+  - authn_socache
+  - authz_dbd
+  - authz_dbm
+  - authz_groupfile
+  - authz_owner
+  - authz_user
+  - autoindex
+  - cache
+  - cache_disk
+  - cache_socache
+  - data
+  - dbd
+  - deflate
+  - dir
+  - dumpio
+  - echo
+  - env
+  - expires
+  - ext_filter
+  - filter
+  - headers
+  - include
+  - info
+  - logio
+  - macro
+  - mime_magic
+  - mime
+  - negotiation
+  - reqtimeout
+  - request
+  - rewrite
+  - setenvif
+  - status
+  - substitute
+  - suexec
+  - userdir
+  - version
+  - vhost_alias
+  - watchdog
+  - dav
+  - dav_fs
+  - dav_lock
+  - lua
+  - mpm_prefork
+  - proxy
+
+logrotate::rules:
+  httpd:
+    path: ['/var/log/httpd/*.log']
+    dateext: true
+    compress: true
+    rotate: 7
+    rotate_every: 'day'
+    ifempty: true
+    missingok: true
+    delaycompress: true
+    postrotate: "systemctl reload httpd"
+  scsm:
+    path: ['/opt/logrhythm/scsm/logs/*.log']
+    dateext: true
+    compress: true
+    rotate: 7
+    rotate_every: 'day'
+    ifempty: true
+    missingok: true
+    delaycompress: true
+    postrotate: "systemctl restart scsm.service"
+  newrelic:
+    path: ['/var/log/newrelic/*.log']
+    dateext: true
+    compress: true
+    rotate: 7
+    rotate_every: 'day'
+    ifempty: true
+    missingok: true
+    delaycompress: true
+    postrotate: "systemctl restart newrelic-sysmond.service"

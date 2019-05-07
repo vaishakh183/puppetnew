@@ -1,0 +1,1272 @@
+---
+hosts::host_entries:
+  'gitlab.inbom1.webhostbox.net':
+    ip: '103.53.40.66'
+  'puppet':
+    ip: '103.211.216.228'
+
+cis::su::users: []
+
+cis::webnodes:
+  - 'blogsite-1.myorderbox.com'
+  - 'blogsite-2.myorderbox.com'
+
+cis::nfsnodes:
+  - 'blogsite-1.myorderbox.com'
+  - 'blogsite-2.myorderbox.com'
+
+#ensure_default_firewall: false
+
+users:
+  hg_in_blog:
+    ensure: 'absent'
+    home: '/var/www/hg_in_blog'
+    home_mode: '750'
+    shell: '/bin/bash'
+  b-hostgator-in:
+    ensure: 'present'
+    home: '/var/www/b-hostgator-in'
+    home_mode: '750'
+    shell: '/bin/bash'
+  b-cn-bluehost-com:
+    ensure: 'present'
+    home: '/var/www/b-cn-bluehost-com'
+    home_mode: '750'
+    shell: '/bin/bash'
+  b-cn-hostgator-com:
+    ensure: 'present'
+    home: '/var/www/b-cn-hostgator-com'
+    home_mode: '750'
+    shell: '/bin/bash'
+  b-bigrock-in:
+    ensure: 'present'
+    home: '/var/www/b-bigrock-in'
+    home_mode: '750'
+    shell: '/bin/bash'
+  b-in-bluehost-com:
+    ensure: 'present'
+    home: '/var/www/b-in-bluehost-com'
+    home_mode: '750'
+    shell: '/bin/bash'
+  r-bigrock-in:
+    ensure: 'present'
+    home: '/var/www/r-bigrock-in'
+    home_mode: '750'
+    shell: '/bin/bash'
+  r-bigrock-com:
+    ensure: 'present'
+    home: '/var/www/r-bigrock-com'
+    home_mode: '750'
+    shell: '/bin/bash'
+  r-hostgator-in:
+    ensure: 'present'
+    home: '/var/www/r-hostgator-in'
+    home_mode: '750'
+    shell: '/bin/bash'
+  r-in-bluehost-com:
+    ensure: 'present'
+    home: '/var/www/r-in-bluehost-com'
+    home_mode: '750'
+    shell: '/bin/bash'
+  b-bigrock-com:
+    ensure: 'present'
+    home: '/var/www/b-bigrock-com'
+    home_mode: '750'
+    shell: '/bin/bash'
+  b-speedhost-in:
+    ensure: 'present'
+    home: '/var/www/b-speedhost-in'
+    home_mode: '750'
+    shell: '/bin/bash'
+  constantcontact.in:
+    ensure: 'present'
+    home: '/var/www/constantcontact.in'
+    home_mode: '750'
+    shell: '/bin/bash'
+  rateus.co.in:
+    ensure: 'present'
+    home: '/var/www/rateus.co.in'
+    home_mode: '750'
+    shell: '/bin/bash'
+  apache:
+    ensure: 'present'
+    home: '/usr/share/httpd'
+    home_mode: '750'
+    gid: '48'
+    shell: '/sbin/nologin'
+    groups: ['b-cn-bluehost-com', 'b-cn-hostgator-com', 'b-bigrock-in', 'b-in-bluehost-com', 'r-bigrock-in', 'r-bigrock-com', 'r-hostgator-in', 'r-in-bluehost-com', 'b-bigrock-com', 'b-speedhost-in', 'constantcontact.in', 'b-hostgator-in', 'constantcontact.in', 'rateus.co.in']
+    comment: 'Apache'
+
+#packages: ['perl-libwww-perl', 'perl-Nagios-Plugin', 'perl-gettext', 'xinetd']
+packages:
+  php71u-pdo:
+    ensure: 'installed'
+  php71u-mysqlnd:
+    ensure: 'installed'
+  php71u-json:
+    ensure: 'installed'
+  php71u-cli:
+    ensure: 'installed'
+  php71u-xml:
+    ensure: 'installed'
+  php71u-process:
+    ensure: 'installed'
+  nano:
+    ensure: 'installed'
+  zip:
+    ensure: 'installed'
+  unzip:
+    ensure: 'installed'
+  perl-libwww-perl:
+    ensure: 'installed'
+  perl-Nagios-Plugin:
+    ensure: 'installed'
+  perl-gettext:
+    ensure: 'installed'
+  xinetd:
+    ensure: 'installed'
+  s3cmd:
+    ensure: 'installed'
+
+yumrepos:
+  mysql57-community:
+    ensure: present
+    baseurl: "http://repo.mysql.com/yum/mysql-5.7-community/el/%{operatingsystemmajrelease}/%{architecture}"
+    descr: 'mysql57-community'
+    enabled: 1
+    gpgcheck: 0
+  'ius':
+    descr: "IUS Community Packages for Enterprise Linux 7 - $basearch"
+    ensure: present
+    mirrorlist: "https://mirrors.iuscommunity.org/mirrorlist?repo=ius-centos7&arch=$basearch&protocol=http"
+    failovermethod: "priority"
+    gpgcheck: 1
+    enabled: 1
+    gpgkey: https://dl.iuscommunity.org/pub/ius/IUS-COMMUNITY-GPG-KEY
+
+files:
+  '/var/log/mysql':
+    ensure: 'directory'
+    owner: 'mysql'
+    group: 'mysql'
+    mode: '0755'
+  '/usr/local/sbin/mysqlcheck':
+    source: 'puppet:///modules/profile/blogsite/mysqlcheck'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    require: Package[xinetd]
+  '/etc/xinetd.d/mysqlcheck':
+    source: 'puppet:///modules/profile/blogsite/xinetdmysqlcheck'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    require: File[/usr/local/sbin/mysqlcheck]
+  '/etc/ssl/wildcard.bigrock.in.key':
+    source: 'puppet:///modules/profile/blogsite/wildcard.bigrock.in.key'
+  '/etc/ssl/wildcard.bigrock.in.pem':
+    source: 'puppet:///modules/profile/blogsite/wildcard.bigrock.in.pem'
+  '/etc/ssl/wildcard.hostgator.in.key':
+    source: 'puppet:///modules/profile/blogsite/wildcard.hostgator.in.key'
+  '/etc/ssl/wildcard.hostgator.in.pem':
+    source: 'puppet:///modules/profile/blogsite/wildcard.hostgator.in.pem'
+  '/etc/ssl/wildcard.bigrock.com.key':
+    source: 'puppet:///modules/profile/blogsite/wildcard.bigrock.com.key'
+  '/etc/ssl/wildcard.bigrock.com.pem':
+    source: 'puppet:///modules/profile/blogsite/wildcard.bigrock.com.pem'
+  '/etc/ssl/wildcard.in.bluehost.com.key':
+    source: 'puppet:///modules/profile/blogsite/wildcard.in.bluehost.com.key'
+  '/etc/ssl/wildcard.in.bluehost.com.pem':
+    source: 'puppet:///modules/profile/blogsite/wildcard.in.bluehost.com.pem'
+  '/etc/ssl/wildcard.cn.hostgator.com.key':
+    source: 'puppet:///modules/profile/blogsite/wildcard.cn.hostgator.com.key'
+  '/etc/ssl/wildcard.cn.hostgator.com.pem':
+    source: 'puppet:///modules/profile/blogsite/wildcard.cn.hostgator.com.pem'
+  '/etc/ssl/wildcard.cn.bluehost.com.key':
+    source: 'puppet:///modules/profile/blogsite/wildcard.cn.bluehost.com.key'
+  '/etc/ssl/wildcard.cn.bluehost.com.pem':
+    source: 'puppet:///modules/profile/blogsite/wildcard.cn.bluehost.com.pem'
+  '/etc/ssl/wildcard.speedhost.in.key':
+    source: 'puppet:///modules/profile/blogsite/wildcard.speedhost.in.key'
+  '/etc/ssl/wildcard.speedhost.in.pem':
+    source: 'puppet:///modules/profile/blogsite/wildcard.speedhost.in.pem'
+  '/etc/ssl/wildcard.constantcontact.in.key':
+    source: 'puppet:///modules/profile/blogsite/wildcard.constantcontact.in.key'
+  '/etc/ssl/wildcard.constantcontact.in.pem':
+    source: 'puppet:///modules/profile/blogsite/wildcard.constantcontact.in.pem'
+  '/etc/ssl/rateus.co.in.key':
+    source: 'puppet:///modules/profile/blogsite/rateus.co.in.key'
+  '/etc/ssl/rateus.co.in.pem':
+    source: 'puppet:///modules/profile/blogsite/rateus.co.in.pem'
+  '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt':
+    source: 'puppet:///modules/profile/blogsite/ssl_webserver_wildcard-ca-bundle.crt'
+  '/etc/php.ini':
+    source: 'puppet:///modules/profile/blogsite/php.ini'
+    notify: Service[httpd]
+  '/root/.s3cfg':
+    source: 'puppet:///modules/profile/sysops/s3cfg'
+    require: Package[s3cmd]
+    owner: 'root'
+    group: 'root'
+    mode: '0600'
+  '/var/lib/clamav/whitelist.ign2':
+    source: 'puppet:///modules/profile/sysops/clamav/whitelist.ign2'
+    require: Package[clamav]
+    owner: 'clamupdate'
+    group: 'clamupdate'
+    mode: '0644'
+    
+mysql::client::package_name: mysql-community-client
+mysql::client::package_ensure: present
+mysql::server::package_name: mysql-community-server
+mysql::server::package_ensure: present
+mysql::server::service_name: mysqld
+mysql::server::config_file: /etc/my.cnf
+mysql::server::includedir: /etc/my.cnf.d
+mysql::server::service_enabled: true
+mysql::server::service_manage: true
+mysql::server::create_root_my_cnf: true
+mysql::server::remove_default_accounts: false
+mysql::server::create_root_user: true
+mysql::server::root_password: 'qcFQu7F5GY@Gx_pb7X'
+mysql::server::log_error: /var/log/mysql/error.log
+mysql::server::override_options:
+  mysqld:
+    bind_address: ["%{facts.networking.interfaces.eth0.ip}"]
+    port: 3310
+    max_connections: 1000
+    log-error: /var/log/mysql/error.log
+    general_log_file: /var/log/mysql/mysql.log
+    general_log: 1
+    slow_query_log: 1
+    slow_query_log_file: /var/log/mysql/slow-queries.log
+    pid-file: /var/run/mysqld/mysqld.pid
+    default-storage-engine: innodb
+    log_bin: mysql-bin.log
+    log_bin_index: mysql-bin.log.index
+    relay-log: mysql-relay-bin
+    relay-log-index: mysql-relay-bin.index
+    log_slave_updates: true
+    master-info-repository: TABLE
+    relay-log-info-repository: TABLE
+    ssl-ca: undef
+    ssl-cert: undef
+    ssl-key: undef
+    innodb_flush_log_at_trx_commit: 2
+    innodb_buffer_pool_size: 512M
+    innodb_log_file_size: 128M
+    expire_logs_days: 10
+    key_buffer_size: "256M"
+    symbolic-links: 0
+    local-infile: 0
+    skip-grant-tables: FALSE
+    skip_symbolic_links: YES
+    log-raw: OFF
+  mysqld_safe:
+    log-error: /var/log/mysql/error.log
+
+mysql::server::databases:
+  blogsitetest:
+    ensure: 'absent'
+  bigrockin_blog:
+    ensure: 'present'
+  blogbigrock:
+    ensure: 'present'
+  bluehost_blog:
+    ensure: 'present'
+  bluehostin_blog:
+    ensure: 'present'
+  cn_hgblog:
+    ensure: 'present'
+  speedho8_wrdp1:
+    ensure: 'present'
+  hg_in_blog:
+    ensure: 'present'
+  rateus:
+    ensure: 'present'
+
+mysql::server::users:
+  'replication@103.76.228.122':
+    ensure: 'present'
+    password_hash: '*FE327FBE2CA1E1D0488B635C34F5911684E24DF6' #kJPRpurJOV4oZOOGP1
+  'replication@103.76.228.215':
+    ensure: 'present'
+    password_hash: '*FE327FBE2CA1E1D0488B635C34F5911684E24DF6' #kJPRpurJOV4oZOOGP1
+  'ganglia@localhost':
+    ensure: 'present'
+    password_hash: '*AA1CB88E3A02789A6D328B19E5F6DB639588BACE' #kJPRpurJOV4oZOOGP1
+  'blogadmin@103.76.228.122':
+    ensure: 'present'
+    password_hash: '*3CA61F8D2E8680BCE790C81512DE81AE81F83CAF' #9MzgCK7Om
+  'blogadmin@103.76.228.215':
+    ensure: 'present'
+    password_hash: '*3CA61F8D2E8680BCE790C81512DE81AE81F83CAF' #9MzgCK7Om
+  'cnhgblogadmin@103.76.228.122':
+    ensure: 'present'
+    password_hash: '*26AC274719E98856983F5591D55B91752CD267C2' #ltfSLhmIp
+  'cnhgblogadmin@103.76.228.215':
+    ensure: 'present'
+    password_hash: '*26AC274719E98856983F5591D55B91752CD267C2' #ltfSLhmIp
+  'brin_blogadmin@103.76.228.122':
+    ensure: 'absent'
+    password_hash: '*F0E9400E85DA1BAF96035CD0C3C4B5092DF121DA' #23Eq6054U
+  'brin_blogadmin@103.76.228.215':
+    ensure: 'absent'
+    password_hash: '*F0E9400E85DA1BAF96035CD0C3C4B5092DF121DA' #23Eq6054U
+  'brin_blog_admin@103.76.228.122':
+    ensure: 'present'
+    password_hash: '*F0E9400E85DA1BAF96035CD0C3C4B5092DF121DA' #23Eq6054U
+  'brin_blog_admin@103.76.228.215':
+    ensure: 'present'
+    password_hash: '*F0E9400E85DA1BAF96035CD0C3C4B5092DF121DA' #23Eq6054U
+  'bluehostinadmin@103.76.228.122':
+    ensure: 'present'
+    password_hash: '*99DB2A2AE1BB61399D61CE0CB3442A437A5C5F01' #5glAxt4Q
+  'bluehostinadmin@103.76.228.215':
+    ensure: 'present'
+    password_hash: '*99DB2A2AE1BB61399D61CE0CB3442A437A5C5F01' #5glAxt4Q
+  'blogbigrock@103.76.228.122':
+    ensure: 'present'
+    password_hash: '*012A6922ABF6C22ECBD97457D7551480E5414BB1' #gHSyWukQAs
+  'blogbigrock@103.76.228.215':
+    ensure: 'present'
+    password_hash: '*012A6922ABF6C22ECBD97457D7551480E5414BB1' #gHSyWukQAs
+  'speedho8_wrdp1@103.76.228.122':
+    ensure: 'present'
+    password_hash: '*7DEC94F4B1F226CB62B362056F6595FE73D16B25' #CnInLZfXkNuz
+  'speedho8_wrdp1@103.76.228.215':
+    ensure: 'present'
+    password_hash: '*7DEC94F4B1F226CB62B362056F6595FE73D16B25' #CnInLZfXkNuz
+  'hg_in_blog@103.76.228.122':
+    ensure: 'present'
+    password_hash: '*8458E84361372E7802945009ED6CCD14390617E4' #Qp-3f7U2ty4rqPaA
+  'hg_in_blog@103.76.228.215':
+    ensure: 'present'
+    password_hash: '*8458E84361372E7802945009ED6CCD14390617E4' #Qp-3f7U2ty4rqPaA
+  'rateus@103.76.228.122':
+    ensure: 'present'
+    password_hash: '*8F9B0258B6F20AF20E288A58243615A6BA6392B8' #hr<#5oxlvV#(B3ag
+  'rateus@103.76.228.215':
+    ensure: 'present'
+    password_hash: '*8F9B0258B6F20AF20E288A58243615A6BA6392B8' #hr<#5oxlvV#(B3ag
+
+mysql::server::grants:
+  'replication@103.76.228.215/*.*':
+    table: '*.*'
+    user: 'replication@103.76.228.215'
+    privileges: 'REPLICATION SLAVE'
+  'replication@103.76.228.122/*.*':
+    table: '*.*'
+    user: 'replication@103.76.228.122'
+    privileges: 'REPLICATION SLAVE'
+  'ganglia@localhost/*.*':
+    table: '*.*'
+    user: 'ganglia@localhost'
+    privileges: 'USAGE'
+  'blogadmin@103.76.228.215/bluehost_blog.*':
+    table: 'bluehost_blog.*'
+    user: 'blogadmin@103.76.228.215'
+    privileges: 'ALL'
+  'blogadmin@103.76.228.122/bluehost_blog.*':
+    table: 'bluehost_blog.*'
+    user: 'blogadmin@103.76.228.122'
+    privileges: 'ALL'
+  'cnhgblogadmin@103.76.228.215/cn_hgblog.*':
+    table: 'cn_hgblog.*'
+    user: 'cnhgblogadmin@103.76.228.215'
+    privileges: 'ALL'
+  'cnhgblogadmin@103.76.228.122/cn_hgblog.*':
+    table: 'cn_hgblog.*'
+    user: 'cnhgblogadmin@103.76.228.122'
+    privileges: 'ALL'
+  'brin_blog_admin@103.76.228.215/bigrockin_blog.*':
+    table: 'bigrockin_blog.*'
+    user: 'brin_blog_admin@103.76.228.215'
+    privileges: 'ALL'
+  'brin_blog_admin@103.76.228.122/bigrockin_blog.*':
+    table: 'bigrockin_blog.*'
+    user: 'brin_blog_admin@103.76.228.122'
+    privileges: 'ALL'
+  'bluehostinadmin@103.76.228.215/bluehostin_blog.*':
+    table: 'bluehostin_blog.*'
+    user: 'bluehostinadmin@103.76.228.215'
+    privileges: 'ALL'
+  'bluehostinadmin@103.76.228.122/bluehostin_blog.*':
+    table: 'bluehostin_blog.*'
+    user: 'bluehostinadmin@103.76.228.122'
+    privileges: 'ALL'
+  'blogbigrock@103.76.228.215/blogbigrock.*':
+    table: 'blogbigrock.*'
+    user: 'blogbigrock@103.76.228.215'
+    privileges: 'ALL'
+  'blogbigrock@103.76.228.122/blogbigrock.*':
+    table: 'blogbigrock.*'
+    user: 'blogbigrock@103.76.228.122'
+    privileges: 'ALL'
+  'speedho8_wrdp1@103.76.228.215/speedho8_wrdp1.*':
+    table: 'speedho8_wrdp1.*'
+    user: 'speedho8_wrdp1@103.76.228.215'
+    privileges: 'ALL'
+  'speedho8_wrdp1@103.76.228.122/speedho8_wrdp1.*':
+    table: 'speedho8_wrdp1.*'
+    user: 'speedho8_wrdp1@103.76.228.122'
+    privileges: 'ALL'
+  'hg_in_blog@103.76.228.215/hg_in_blog.*':
+    table: 'hg_in_blog.*'
+    user: 'hg_in_blog@103.76.228.215'
+    privileges: 'ALL'
+  'hg_in_blog@103.76.228.122/hg_in_blog.*':
+    table: 'hg_in_blog.*'
+    user: 'hg_in_blog@103.76.228.122'
+    privileges: 'ALL'
+  'rateus@103.76.228.215/rateus.*':
+    table: 'rateus.*'
+    user: 'rateus@103.76.228.215'
+    privileges: 'ALL'
+  'rateus@103.76.228.122/rateus.*':
+    table: 'rateus.*'
+    user: 'rateus@103.76.228.122'
+    privileges: 'ALL'
+
+logrotate::rules:
+  mysql:
+    path: ['/var/log/mysql/*.log']
+    dateext: true
+    compress: true
+    rotate: 5
+    rotate_every: 'day'
+    ifempty: true
+    missingok: true
+    delaycompress: true
+    copytruncate: true
+    create: true
+    create_mode: '644'
+    create_owner: 'mysql'
+    create_group: 'mysql'
+
+haproxy::global_options:
+  log: '127.0.0.1 local0'
+  chroot: '/var/lib/haproxy'
+  pidfile: '/var/run/haproxy.pid'
+  maxconn: '2048'
+  user: 'haproxy'
+  group: 'haproxy'
+  daemon: ''
+  stats: 'socket /var/lib/haproxy/stats'
+haproxy::defaults_options:
+  retries: '3'
+  timeout: ['connect 5000ms', 'client 50000ms', 'server 50000ms']
+haproxy::listen:
+  MySQL:
+    ipaddress: '0.0.0.0'
+    ports: '3306'
+    mode: 'tcp' 
+    options:
+      timeout: ['connect 60s', 'client 3m', 'server 3m'] 
+      option: 'httpchk' 
+  stats:
+    ipaddress: 'localhost'
+    ports: '9999'
+    mode: 'http'
+    options:
+      stats: ['uri /haproxy?stats']
+      log: 'global'
+haproxy::balancermember:
+  Master01:
+    listening_service: 'MySQL'
+    ports: '3310'
+    server_names: ['blogsite-1']
+    ipaddresses: ['103.76.228.122']
+    options: 'check port 8306 inter 15s rise 4 fall 4'
+  Master02:
+    listening_service: 'MySQL'
+    ports: '3310'
+    server_names: ['blogsite-2']
+    ipaddresses: ['103.76.228.215']
+    options: 'check port 8306 inter 15s rise 4 fall 4 backup'
+
+apache::mod::php::package_name: "php71u"
+apache::mod::php::php_version: '7.1'
+apache::mod::php::path: '/etc/httpd/modules/libphp7.so'
+apache::server_signature: "Off"
+apache::server_tokens: "Prod"
+apache::trace_enable: "Off"
+apache::file_e_tag: "None"
+apache::keepalive: "On"
+apache::service_restart: "/sbin/apachectl configtest && /usr/bin/systemctl reload httpd"
+apache::default_vhost: false
+apache::mod::ssl::apache_version: "2.4"
+apache::mod::ssl::package_name: "mod_ssl"
+apache::mod::security::modsec_secruleengine: "Off"
+apache::default_mods:
+  - access_compat
+  - actions
+  - alias
+  - allowmethods
+  - auth_basic
+  - auth_digest
+  - authn_anon
+  - authn_core
+  - authn_dbm
+  - authn_file
+  - authn_socache
+  - authz_dbd
+  - authz_dbm
+  - authz_groupfile
+  - authz_owner
+  - authz_user
+  - autoindex
+  - cache
+  - cache_disk
+  - cache_socache
+  - data
+  - dbd
+  - deflate
+  - dir
+  - dumpio
+  - echo
+  - env
+  - expires
+  - ext_filter
+  - filter
+  - headers
+  - include
+  - info
+  - logio
+  - macro
+  - mime_magic
+  - mime
+  - negotiation
+  - reqtimeout
+  - request
+  - rewrite
+  - setenvif
+  - status
+  - substitute
+  - suexec
+  - userdir
+  - version
+  - vhost_alias
+  - watchdog
+  - dav
+  - dav_fs
+  - dav_lock
+  - lua
+  - mpm_prefork
+  - proxy
+apache::manage_user: false
+apache::manage_group: false
+
+apache::vhost:
+  'resources.bigrock.in_non-ssl':
+    servername: 'resources.bigrock.in'
+    serveraliases: 'resources_admin.bigrock.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "r-bigrock-in"
+    docroot_group: "r-bigrock-in"
+    port: '80'
+    docroot: '/var/www/r-bigrock-in/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://resources.bigrock.in/'
+  'resources.bigrock.in_ssl':
+    servername: 'resources.bigrock.in'
+    serveraliases: 'resources_admin.bigrock.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "r-bigrock-in"
+    docroot_group: "r-bigrock-in"
+    docroot: '/var/www/r-bigrock-in/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.bigrock.in.pem'
+    ssl_key: '/etc/ssl/wildcard.bigrock.in.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+  'resources.bigrock.com_non-ssl':
+    servername: 'resources.bigrock.com'
+    serveraliases: 'resources_admin.bigrock.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "r-bigrock-com"
+    docroot_group: "r-bigrock-com"
+    port: '80'
+    docroot: '/var/www/r-bigrock-com/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://resources.bigrock.com/'
+  'resources.bigrock.com_ssl':
+    servername: 'resources.bigrock.com'
+    serveraliases: 'resources_admin.bigrock.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "r-bigrock-com"
+    docroot_group: "r-bigrock-com"
+    docroot: '/var/www/r-bigrock-com/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.bigrock.com.pem'
+    ssl_key: '/etc/ssl/wildcard.bigrock.com.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+  'resources.hostgator.in_non-ssl':
+    servername: 'resources.hostgator.in'
+    serveraliases: 'resources_admin.hostgator.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "r-hostgator-in"
+    docroot_group: "r-hostgator-in"
+    port: '80'
+    docroot: '/var/www/r-hostgator-in/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://resources.hostgator.in/'
+  'resources.hostgator.in_ssl':
+    servername: 'resources.hostgator.in'
+    serveraliases: 'resources_admin.hostgator.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "r-hostgator-in"
+    docroot_group: "r-hostgator-in"
+    docroot: '/var/www/r-hostgator-in/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.hostgator.in.pem'
+    ssl_key: '/etc/ssl/wildcard.hostgator.in.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+  'resources.in.bluehost.com_non-ssl':
+    servername: 'resources.in.bluehost.com'
+    serveraliases: 'resources_admin.in.bluehost.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "r-in-bluehost-com"
+    docroot_group: "r-in-bluehost-com"
+    port: '80'
+    docroot: '/var/www/r-in-bluehost-com/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://resources.in.bluehost.com/'
+  'resources.in.bluehost.com_ssl':
+    servername: 'resources.in.bluehost.com'
+    serveraliases: 'resources_admin.in.bluehost.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "r-in-bluehost-com"
+    docroot_group: "r-in-bluehost-com"
+    docroot: '/var/www/r-in-bluehost-com/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.in.bluehost.com.pem'
+    ssl_key: '/etc/ssl/wildcard.in.bluehost.com.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+  'blog.hostgator.in_non-ssl':
+    servername: 'blog.hostgator.in'
+    serveraliases: 'blogadmin.hostgator.in blogbackend.hostgator.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "b-hostgator-in"
+    docroot_group: "b-hostgator-in"
+    port: '80'
+    docroot: '/var/www/b-hostgator-in/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://blog.hostgator.in/'
+  'blog.hostgator.in_ssl':
+    servername: 'blog.hostgator.in'
+    serveraliases: 'blogadmin.hostgator.in blogbackend.hostgator.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "b-hostgator-in"
+    docroot_group: "b-hostgator-in"
+    docroot: '/var/www/b-hostgator-in/public'
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.hostgator.in.pem'
+    ssl_key: '/etc/ssl/wildcard.hostgator.in.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+    directories:
+     - 
+       path: "/var/www/b-hostgator-in/public"
+       headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure' 
+       options: ["-Indexes", "+FollowSymLinks", "-ExecCGI", "-MultiViews", "-Includes"]
+       allow_override: "All"
+       directoryindex: "index.php index.html"
+     - 
+       path: '/var/www/b-hostgator-in/public/wp-admin/'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+     - 
+       path: '/var/www/b-hostgator-in/public/wp-login.php'
+       provider: 'files'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+  'blogbackend.cn.bluehost.com_non-ssl':
+    servername: 'blogbackend.cn.bluehost.com'
+    serveraliases: 'blogadmin.cn.bluehost.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "b-cn-bluehost-com"
+    docroot_group: "b-cn-bluehost-com"
+    port: '80'
+    docroot: '/var/www/b-cn-bluehost-com/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://blogbackend.cn.bluehost.com/'
+  'blogbackend.cn.bluehost.com_ssl':
+    servername: 'blogbackend.cn.bluehost.com'
+    serveraliases: 'blogadmin.cn.bluehost.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "b-cn-bluehost-com"
+    docroot_group: "b-cn-bluehost-com"
+    docroot: '/var/www/b-cn-bluehost-com/public'
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.cn.bluehost.com.pem'
+    ssl_key: '/etc/ssl/wildcard.cn.bluehost.com.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+    directories:
+     -
+       path: "/var/www/b-cn-bluehost-com/public"
+       headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+       options: ["-Indexes", "+FollowSymLinks", "-ExecCGI", "-MultiViews", "-Includes"]
+       allow_override: "All"
+       directoryindex: "index.php index.html"
+     -
+       path: '/var/www/b-cn-bluehost-com/public/wp-admin/'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61 103.195.187.42 103.195.187.253 116.231.174.226 116.206.107.94 45.113.120.96'
+     -
+       path: '/var/www/b-cn-bluehost-com/public/wp-login.php'
+       provider: 'files'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61 103.195.187.42 103.195.187.253 116.231.174.226 116.206.107.94 45.113.120.96'
+  'blogbackend.cn.hostgator.com_non-ssl':
+    servername: 'blogbackend.cn.hostgator.com'
+    serveraliases: 'blogadmin.cn.hostgator.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "b-cn-hostgator-com"
+    docroot_group: "b-cn-hostgator-com"
+    port: '80'
+    docroot: '/var/www/b-cn-hostgator-com/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://blogbackend.cn.hostgator.com/'
+  'blogbackend.cn.hostgator.com_ssl':
+    servername: 'blogbackend.cn.hostgator.com'
+    serveraliases: 'blogadmin.cn.hostgator.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "b-cn-hostgator-com"
+    docroot_group: "b-cn-hostgator-com"
+    docroot: '/var/www/b-cn-hostgator-com/public'
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.cn.hostgator.com.pem'
+    ssl_key: '/etc/ssl/wildcard.cn.hostgator.com.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+    directories:
+     -
+       path: "/var/www/b-cn-hostgator-com/public"
+       headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+       options: ["-Indexes", "+FollowSymLinks", "-ExecCGI", "-MultiViews", "-Includes"]
+       allow_override: "All"
+       directoryindex: "index.php index.html"
+     -
+       path: '/var/www/b-cn-hostgator-com/public/wp-admin/'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61 103.195.187.42 103.195.187.253 116.231.174.226 116.206.107.94 45.113.120.96'
+     -
+       path: '/var/www/b-cn-hostgator-com/public/wp-login.php'
+       provider: 'files'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61 103.195.187.42 103.195.187.253 116.231.174.226 116.206.107.94 45.113.120.96'
+  'blogbackend.bigrock.in_non-ssl':
+    servername: 'blogbackend.bigrock.in'
+    serveraliases: 'blogadmin.bigrock.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "b-bigrock-in"
+    docroot_group: "b-bigrock-in"
+    port: '80'
+    docroot: '/var/www/b-bigrock-in/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://blogbackend.bigrock.in/'
+  'blogbackend.bigrock.in_ssl':
+    servername: 'blogbackend.bigrock.in'
+    serveraliases: 'blogadmin.bigrock.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "b-bigrock-in"
+    docroot_group: "b-bigrock-in"
+    docroot: '/var/www/b-bigrock-in/public'
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.bigrock.in.pem'
+    ssl_key: '/etc/ssl/wildcard.bigrock.in.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+    directories:
+     -
+       path: "/var/www/b-bigrock-in/public"
+       headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+       options: ["-Indexes", "+FollowSymLinks", "-ExecCGI", "-MultiViews", "-Includes"]
+       allow_override: "All"
+       directoryindex: "index.php index.html"
+     -
+       path: '/var/www/b-bigrock-in/public/wp-admin/'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+     -
+       path: '/var/www/b-bigrock-in/public/wp-login.php'
+       provider: 'files'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+  'blogbackend.in.bluehost.com_non-ssl':
+    servername: 'blogbackend.in.bluehost.com'
+    serveraliases: 'blogadmin.in.bluehost.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "b-in-bluehost-com"
+    docroot_group: "b-in-bluehost-com"
+    port: '80'
+    docroot: '/var/www/b-in-bluehost-com/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://blogbackend.in.bluehost.com/'
+  'blogbackend.in.bluehost.com_ssl':
+    servername: 'blogbackend.in.bluehost.com'
+    serveraliases: 'blogadmin.in.bluehost.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "b-in-bluehost-com"
+    docroot_group: "b-in-bluehost-com"
+    docroot: '/var/www/b-in-bluehost-com/public'
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.in.bluehost.com.pem'
+    ssl_key: '/etc/ssl/wildcard.in.bluehost.com.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+    directories:
+     -
+       path: "/var/www/b-in-bluehost-com/public"
+       headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+       options: ["-Indexes", "+FollowSymLinks", "-ExecCGI", "-MultiViews", "-Includes"]
+       allow_override: "All"
+       directoryindex: "index.php index.html"
+     -
+       path: '/var/www/b-in-bluehost-com/public/wp-admin/'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+     -
+       path: '/var/www/b-in-bluehost-com/public/wp-login.php'
+       provider: 'files'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+  'blog.bigrock.com_non-ssl':
+    servername: 'blog.bigrock.com'
+    serveraliases: 'blogadmin.bigrock.com blogbackend.bigrock.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "b-bigrock-com"
+    docroot_group: "b-bigrock-com"
+    port: '80'
+    docroot: '/var/www/b-bigrock-com/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://blog.bigrock.com/'
+  'blog.bigrock.com_ssl':
+    servername: 'blog.bigrock.com'
+    serveraliases: 'blogadmin.bigrock.com blogbackend.bigrock.com'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "b-bigrock-com"
+    docroot_group: "b-bigrock-com"
+    docroot: '/var/www/b-bigrock-com/public'
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.bigrock.com.pem'
+    ssl_key: '/etc/ssl/wildcard.bigrock.com.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+    directories:
+     -
+       path: "/var/www/b-bigrock-com/public"
+       headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+       options: ["-Indexes", "+FollowSymLinks", "-ExecCGI", "-MultiViews", "-Includes"]
+       allow_override: "All"
+       directoryindex: "index.php index.html"
+     -
+       path: '/var/www/b-bigrock-com/public/wp-admin/'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+     -
+       path: '/var/www/b-bigrock-com/public/wp-login.php'
+       provider: 'files'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+  'blogbackend.speedhost.in_non-ssl':
+    servername: 'blogbackend.speedhost.in'
+    serveraliases: 'blogadmin.speedhost.in blog.speedhost.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "b-speedhost-in"
+    docroot_group: "b-speedhost-in"
+    port: '80'
+    docroot: '/var/www/b-speedhost-in/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://blog.speedhost.in/'
+  'blogbackend.speedhost.in_ssl':
+    servername: 'blogbackend.speedhost.in'
+    serveraliases: 'blogadmin.speedhost.in blog.speedhost.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "b-speedhost-in"
+    docroot_group: "b-speedhost-in"
+    docroot: '/var/www/b-speedhost-in/public'
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.speedhost.in.pem'
+    ssl_key: '/etc/ssl/wildcard.speedhost.in.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+    directories:
+     -
+       path: "/var/www/b-speedhost-in/public"
+       headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+       options: ["-Indexes", "+FollowSymLinks", "-ExecCGI", "-MultiViews", "-Includes"]
+       allow_override: "All"
+       directoryindex: "index.php index.html"
+     -
+       path: '/var/www/b-speedhost-in/public/wp-admin/'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+     -
+       path: '/var/www/b-speedhost-in/public/wp-login.php'
+       provider: 'files'
+       require: 'ip 115.110.127.198 115.110.126.72/29 115.110.71.146 122.15.255.69 122.15.251.40/29 122.15.181.197 172.27.0.0/18 172.16.128.0/18 172.16.171.117 103.50.163.142 111.118.214.69 103.21.58.61'
+  'constantcontact.in_non-ssl':
+    servername: 'constantcontact.in'
+    serveraliases: '*.constantcontact.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "constantcontact.in"
+    docroot_group: "constantcontact.in"
+    port: '80'
+    docroot: '/var/www/constantcontact.in/public'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://www.constantcontact.in/'
+  'constantcontact.in_ssl':
+    servername: 'constantcontact.in'
+    serveraliases: '*.constantcontact.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "constantcontact.in"
+    docroot_group: "constantcontact.in"
+    docroot: '/var/www/constantcontact.in/public'
+    ssl: true
+    ssl_cert: '/etc/ssl/wildcard.constantcontact.in.pem'
+    ssl_key: '/etc/ssl/wildcard.constantcontact.in.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+    directories:
+     -
+       path: "/var/www/constantcontact.in/public"
+       headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+       options: ["-Indexes", "+FollowSymLinks", "-ExecCGI", "-MultiViews", "-Includes"]
+       allow_override: "All"
+       directoryindex: "index.php index.html"
+     -
+       path: '\.(css|js)$'
+       provider: 'filesmatch'
+       headers:
+        - 'set Cache-Control "max-age=86400"'
+       custom_fragment: 'FileETag MTime Size'
+    filters:
+      - 'AddOutputFilterByType DEFLATE text/plain'
+      - 'AddOutputFilterByType DEFLATE text/html'
+      - 'AddOutputFilterByType DEFLATE text/xml'
+      - 'AddOutputFilterByType DEFLATE text/css'
+      - 'AddOutputFilterByType DEFLATE text/javascript'
+      - 'AddOutputFilterByType DEFLATE application/js'
+      - 'AddOutputFilterByType DEFLATE application/javascript'
+      - 'AddOutputFilterByType DEFLATE application/x-javascript'
+      - 'AddOutputFilterByType DEFLATE image/jpeg'
+      - 'AddOutputFilterByType DEFLATE image/png'
+      - 'AddOutputFilterByType DEFLATE image/jpg'
+  'rateus.co.in_non-ssl':
+    servername: 'rateus.co.in'
+    serveraliases: '*.rateus.co.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    docroot_owner: "rateus.co.in"
+    docroot_group: "rateus.co.in"
+    port: '80'
+    docroot: '/var/www/rateus.co.in/public/'
+    options: ["-Indexes", "-ExecCGI", "-MultiViews", "-Includes"]
+    redirect_status: 'permanent'
+    redirect_dest: 'https://rateus.co.in/'
+  'rateus.co.in_ssl':
+    servername: 'rateus.co.in'
+    serveraliases: '*.rateus.co.in'
+    serveradmin: 'apac-sysops@endurance.com'
+    port: '443'
+    custom_fragment: 'UserDir disabled'
+    docroot_owner: "rateus.co.in"
+    docroot_group: "rateus.co.in"
+    docroot: '/var/www/rateus.co.in/public/'
+    ssl: true
+    ssl_cert: '/etc/ssl/rateus.co.in.pem'
+    ssl_key: '/etc/ssl/rateus.co.in.key'
+    ssl_chain: '/etc/ssl/ssl_webserver_wildcard-ca-bundle.crt'
+    ssl_cipher: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS:!RC4'
+    ssl_protocol: 'ALL -SSLv2 -SSLv3 -TLSv1 -TLSv1.1'
+    directories:
+     -
+       path: "/var/www/rateus.co.in/public/"
+       headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+       options: ["-Indexes", "+FollowSymLinks", "-ExecCGI", "-MultiViews", "-Includes"]
+       allow_override: "All"
+       directoryindex: "index.php index.html"
+     -
+       path: '\.(css|js)$'
+       provider: 'filesmatch'
+       headers:
+        - 'set Cache-Control "max-age=86400"'
+       custom_fragment: 'FileETag MTime Size'
+    filters:
+      - 'AddOutputFilterByType DEFLATE text/plain'
+      - 'AddOutputFilterByType DEFLATE text/html'
+      - 'AddOutputFilterByType DEFLATE text/xml'
+      - 'AddOutputFilterByType DEFLATE text/css'
+      - 'AddOutputFilterByType DEFLATE text/javascript'
+      - 'AddOutputFilterByType DEFLATE application/js'
+      - 'AddOutputFilterByType DEFLATE application/javascript'
+      - 'AddOutputFilterByType DEFLATE application/x-javascript'
+      - 'AddOutputFilterByType DEFLATE image/jpeg'
+      - 'AddOutputFilterByType DEFLATE image/png'
+      - 'AddOutputFilterByType DEFLATE image/jpg'
+
+firewall_rules:
+  allow_http:
+    name: '501 allow http from all sources'
+    proto: 'tcp'
+    source: '0.0.0.0/0'
+    dport: '80'
+    action: 'accept'
+  allow_https:
+    name: '502 allow https from all sources'
+    proto: 'tcp'
+    dport: '443'
+    source: '0.0.0.0/0'
+    action: 'accept'
+  allow_icmp:
+    name: '902 allow icmp from office network - Bangalore Private IP'
+    proto: 'icmp'
+    source: '172.27.0.0/18'
+    action: 'accept'
+  allow_icmp2:
+    name: '602 allow icmp from office network - Mumbai Private IP'
+    proto: 'icmp'
+    source: '172.16.128.0/18'
+    action: 'accept'
+  allow_icmp3:
+    name: '603 allow icmp from office network - Bangalore TATA Public IP'
+    proto: 'icmp'
+    source: '115.110.71.146/30'
+    action: 'accept'
+  allow_icmp4:
+    name: '604 allow icmp from office network - Bangalore Vodafone Public IP'
+    proto: 'icmp'
+    source: '122.15.181.197/30'
+    action: 'accept'
+  allow_icmp5:
+    name: '605 allow icmp from office network - Mumbai TATA Public IP'
+    proto: 'icmp'
+    source: '115.110.127.198'
+    action: 'accept'
+  allow_icmp6:
+    name: '606 allow icmp from office network - Mumbai Vodafone Public IP'
+    proto: 'icmp'
+    source: '122.15.255.69'
+    action: 'accept'
+  allow_icmp7:
+    name: '607 allow icmp from office network - Mumbai TATA DMZ Public IP'
+    proto: 'icmp'
+    source: '115.110.126.72/29'
+    action: 'accept'
+  allow_icmp8:
+    name: '608 allow icmp from office network - Mumbai Vodafone DMZ Public IP'
+    proto: 'icmp'
+    source: '122.15.251.40/29'
+    action: 'accept'
+  allow_http_out:
+    name: '498 allow http to all'
+    chain: 'OUTPUT'
+    proto: 'tcp'
+    destination: '0.0.0.0/0'
+    dport: '80'
+    action: 'accept'
+  allow_https_out:
+    name: '499 allow https to all'
+    chain: 'OUTPUT'
+    proto: 'tcp'
+    destination: '0.0.0.0/0'
+    dport: '443'
+    action: 'accept'
+  allow_root_outbound:
+    name: '500 allow all access to outbound for root user'
+    chain: 'OUTPUT'
+    gid: '0'
+    proto: 'all'
+    action: 'accept'
+  allow_related_established_out:
+    name: '501 allow RELATED and ESTABLISHED connections to outbound'
+    chain: 'OUTPUT'
+    proto: 'all'
+    state: ['RELATED', 'ESTABLISHED']
+    action: 'accept'
+  allow_localhost_out:
+    name: '502 allow localhost on outbound'
+    chain: 'OUTPUT'
+    proto: 'all'
+    outiface: 'lo'
+    action: 'accept'
+  allow_dns_lookups1:
+    name: "503 allow DNS Lookups"
+    chain: 'OUTPUT'
+    destination: '8.8.8.8/32'
+    proto: 'udp'
+    dport: 53
+    action: 'accept'
+  allow_dns_lookups2:
+    name: "504 allow DNS Lookups"
+    chain: 'OUTPUT'
+    destination: '8.8.4.4/32'
+    proto: 'udp'
+    dport: 53
+    action: 'accept'
+  allow_ntp_sync:
+    name: "505 allow NTP Sync"
+    chain: 'OUTPUT'
+    proto: 'udp'
+    destination: '103.211.218.234/32'
+    dport: 123
+    action: 'accept'
+  allow_httpapi_outbound:
+    name: "506 allow connection to httpapi outbound"
+    chain: 'OUTPUT'
+    proto: 'tcp'
+    destination: '209.99.17.14/32'
+    dport: 443
+    action: 'accept'
+
+firewall_chains:
+  'FORWARD:filter:IPv4':
+    ensure: present
+    policy: drop
+  'OUTPUT:filter:IPv4':
+    ensure: present
+    policy: drop
+
+tcpwrappers::allow:
+  'allow_localhost':
+    client_list: ['127.0.0.1']
+    daemon_list: 'all'
+    order: '10_allow_localhost'
+    comment: 'Allow all from localhost'
+  'allow_office_ips':
+    client_list: ['115.110.127.198', '115.110.126.72/255.255.255.248', '115.110.71.146', '122.15.255.69', '122.15.251.40/255.255.255.248', '122.15.181.197']
+    daemon_list: 'sshd'
+    order: '22_sshd_office'
+    comment: 'Allow ssh only from office IPs'
+  'allow_sentinel_gpx':
+    client_list: ['103.21.58.61']
+    daemon_list: 'sshd'
+    order: '22_sshd_sentinel'
+    comment: 'Allow ssh from sentinel boxes'
+
+profile::nagios::client::custom_plugins:
+  - check_cert_expiry.sh
+
+profile::accounts::included_users:
+  - karthik.i
+  - riyan.a
+  - ramdass.s
+  - vijay.b
+  - madhav.k
+  - roshan.r
+  - aditya.k
+  - noel.v
+  - lalith.h
+  - bilal.k
+  - vikash.s
+  - benf
+  - shaunl
+  - rwest
+  - rdosogne
+  - dlair
+  - michaelsmith
+  - jmbushman
+  - mforeman
+  - bhoffart
+  - jcummings
+  - tlight
+
+profile::nessusagent::groups: 'APAC_mainsites_billing'

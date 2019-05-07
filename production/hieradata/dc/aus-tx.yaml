@@ -1,0 +1,24 @@
+---
+yumrepos:
+  sysad:
+    descr: "Sysad Repo"
+    ensure: present
+    baseurl: "https://pulp-austin.india.endurance.com/pulp/repos/sysad-el7_x86_64/"
+    enabled: 1
+    sslverify: false
+    gpgcheck: 0
+
+tcpwrappers::allow:
+  'allow_sentinel':
+    client_list: ['172.17.40.35','172.17.40.80','172.17.40.81']
+    daemon_list: 'sshd'
+    order: '22_sshd_all'
+    comment: "Allow sentinel boxes for monitoring"
+
+ntp::servers:
+  - 172.17.40.90
+  - 172.17.40.82
+
+resolv_conf::nameservers:
+  - 172.17.40.72
+  - 172.17.40.83

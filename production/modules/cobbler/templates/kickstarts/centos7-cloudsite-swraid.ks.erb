@@ -1,0 +1,62 @@
+keyboard us
+lang en_US.UTF-8
+timezone UTC
+selinux --disabled
+firewall --disabled
+firstboot --disable
+text
+install
+skipx
+zerombr
+bootloader --location mbr --driveorder sda,sdb
+clearpart --all --drives sda,sdb --initlabel
+part raid.11 --size  1024 --ondisk sda --asprimary --grow
+part raid.21 --size  1024 --ondisk sdb --asprimary --grow
+raid / --fstype ext4 --fsoptions="defaults,noatime,nodiratime" --level 1 --device md0 raid.11 raid.21
+url --url $tree
+$yum_repo_stanza
+rootpw --iscrypted $6$XayTaj7X$WLo3gu0Ic2BCZTOn0XjAONU4KuIjDaBt5id6GBRTj4zF5pxTk8ZCi226AW8e8OPkCfnqt04LeFrfoYn4Xa8na0
+services --disabled irqbalance,tuned,iprinit,iprdump,iprupdate,avahi-daemon,polkit,postfix,firewalld,messagebus,auditd,NetworkManager
+services --enabled puppet
+reboot
+
+%pre
+$SNIPPET('log_ks_pre')
+$SNIPPET('kickstart_start')
+$SNIPPET('pre_install_network_config')
+$SNIPPET('pre_anamon')
+%end
+
+%packages --nobase
+wget
+rsync
+puppet-3.7.3-1.el7
+rubygem-deep_merge
+ntpdate
+%end
+
+%post
+$SNIPPET('log_ks_post')
+$SNIPPET('post_install_kernel_options')
+$SNIPPET('post_install_network_config')
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-ipmi
+/bin/cat > /etc/sysconfig/network-scripts/ifcfg-eth0 <<EOM
+DEVICE=eth0
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+EOM
+/bin/cat > /etc/sysconfig/network-scripts/ifcfg-eth0.132 <<EOM
+DEVICE=eth0.132
+TYPE=Ethernet
+VLAN=yes
+BOOTPROTO=dhcp
+ONBOOT=yes
+EOM
+/sbin/mdadm --detail --scan > /etc/mdadm.conf
+/usr/sbin/ntpdate 172.23.40.4
+/usr/sbin/hwclock --systohc
+/usr/bin/echo $hostname > /etc/hostname
+$SNIPPET('post_anamon')
+$SNIPPET('kickstart_done')
+%end

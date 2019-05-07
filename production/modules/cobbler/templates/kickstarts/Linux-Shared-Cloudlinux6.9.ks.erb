@@ -1,0 +1,84 @@
+# interactive mode for testing
+# interactive
+# System authorization information
+auth  --useshadow  --enablemd5
+# System bootloader configuration
+bootloader --location mbr --driveorder sda
+# Use text mode install
+text
+# Firewall configuration
+firewall --enabled
+# Run the Setup Agent on first boot
+firstboot --disable
+# System keyboard
+keyboard us
+# System language
+lang en_US
+# Use network installation
+url --url=$tree
+# disable unwanted services:
+services --disabled atd,autofs,avahi-daemon,cups,firstboot,gpm,ip6tables,kudzu,lvm2-monitor,mcstrans,mdmonitor,netfs,nfs,nfslock,portmap,readahead_early,restorecond,rpcgssd,rpcidmapd
+# If any cobbler repo definitions were referenced in the kickstart profile, include them here.
+# Network information
+$SNIPPET('network_config')
+# Reboot after installation
+reboot
+
+# Root password
+# rootpw --iscrypted $1$SI6JY13d$n1NO7oSV9bYpYd/ExD1Oj0
+# rootpw --iscrypted $1$8g3KM8gJ$aS50drVadqRcHXYJpp1.X/
+rootpw --iscrypted $1$BvjXQzRy$WuDMlXT/.URwiJzUcVUnf0
+
+# SELinux configuration
+selinux --disabled
+# Do not configure the X Window System
+skipx
+# System timezone
+timezone  Etc/GMT
+# Install OS instead of upgrade
+install
+# Clear the Master Boot Record
+zerombr
+# Allow anaconda to partition the system as needed
+clearpart --all --drives sda,sdb --initlabel
+#part / --asprimary --label=/ --fstype=ext4  --size 1000 --grow --maxsize=500000 --fsoptions="defaults,usrquota,grpquota,acl,noatime,nodiratime" --ondisk sda
+part / --asprimary --label=/ --fstype=ext4  --size 1000 --grow --maxsize=512000 --fsoptions="defaults,usrquota,grpquota,acl,noatime,nodiratime" --ondisk sda
+part swap --size 4096 --label=SWAP-sda2 --ondisk sda
+part /tmp --fstype=ext4  --label=/tmp --size 1048 --fsoptions="defaults,usrquota,grpquota,acl,noatime,nodiratime,noexec,nosuid" --ondisk sda
+part /home --fstype=ext4 --label=/home --size 1000 --grow  --fsoptions="defaults,usrquota,grpquota,acl,noatime,nodiratime" --ondisk sdb
+
+%pre
+$SNIPPET('log_ks_pre')
+$kickstart_start
+# Enable installation monitoring
+$SNIPPET('pre_anamon')
+$SNIPPET('pre_install_network_config')
+
+
+# Post-install stuff:
+%post
+
+$SNIPPET('log_ks_post')
+
+# now we can create a separate dir. to log to
+test -d /var/log/kickstart || mkdir /var/log/kickstart
+
+$SNIPPET('correct_drive_labels_normal')
+
+echo -e "\nRunning Post Installation Script\n"
+
+$SNIPPET('post_install_kernel_options')
+$SNIPPET('omsa')
+$SNIPPET('koan_environment')
+# Enable post-install boot notification
+$SNIPPET('post_anamon')
+$SNIPPET('post_install_network_config')
+$SNIPPET('misc')
+$SNIPPET('misc-cpanel')
+$SNIPPET('shared-repo')
+$SNIPPET('yum-pakages')
+$SNIPPET('dhclient-conf')
+# TODO: REMEMBER TO ADD DISK CACHE DISABLING SCRIPT LATER
+# Start final steps
+$kickstart_done
+# End final steps

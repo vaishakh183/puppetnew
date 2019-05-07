@@ -1,0 +1,84 @@
+# ******************************************************************
+# Cobbler managed dhcpd.conf file
+#
+# generated from cobbler dhcp.conf template ($date)
+# Do NOT make changes to /etc/dhcpd.conf. Instead, make your changes
+# in /etc/cobbler/dhcp.template, as /etc/dhcpd.conf will be
+# overwritten.
+#
+# /etc/cobbler/dhcp.template is managed by puppet
+#
+# ******************************************************************
+
+ddns-update-style interim;
+
+allow booting;
+allow bootp;
+
+ignore client-updates;
+set vendorclass = option vendor-class-identifier;
+
+option pxe-system-type code 93 = unsigned integer 16;
+
+<% unless @dhcp_subnets == '' or @dhcp_subnets.nil? -%>
+<% @dhcp_subnets.each do |dhcp_subnet, pools| -%>
+<% subnet, netmask   = dhcp_subnet.split('/') -%>
+subnet <%= subnet %> netmask <%= netmask %> {
+<% pools.each do |pool| -%>
+    pool {
+#        option domain-name          "<%= @domain %>";
+        option routers              <%= subnet.match(/\d+\.\d+\.\d+/).to_s + '.1' %>;
+        option subnet-mask          <%= netmask %>;
+        option domain-name-servers  <%=
+        if pool['nameservers']
+            pool['nameservers'].join(', ')
+        elsif @nameservers != ''
+            @nameservers.join(', ')
+        end %>;<%
+        if pool['pool_type'] == 'bootp' %>
+        range dynamic-bootp         <%= pool['range_low'] %> <%= pool['range_high'] %>;
+        next-server                 <%= pool['next-server'] or '$next_server' %>;
+        filename                    "<%= pool['filename'] or '/pxelinux.0' %>";<%
+        elsif pool['pool_type'] == 'dhcp' %>
+        range                       <%= pool['range_low'] %> <%= pool['range_high'] %>;<%
+        end -%><%
+        if pool['max-lease-time'] %>
+        max-lease-time              <%= pool['max-lease-time'] %>;<%
+        end %><% 
+        if pool['deny-unknown-clients'] %>
+        deny                        unknown-clients;<%
+        end %>
+    }
+<% end -%>
+}
+<% end -%>
+<% end -%>
+
+#for dhcp_tag in $dhcp_tags.keys():
+    ## group could be subnet if your dhcp tags line up with your subnets
+    ## or really any valid dhcpd.conf construct ... if you only use the
+    ## default dhcp tag in cobbler, the group block can be deleted for a
+    ## flat configuration
+# group for Cobbler DHCP tag: $dhcp_tag
+group {
+    #for mac in $dhcp_tags[$dhcp_tag].keys():
+    #set iface = $dhcp_tags[$dhcp_tag][$mac]
+#    host $iface.name {
+#        hardware ethernet $mac;
+#        #if $iface.ip_address:
+#        fixed-address $iface.ip_address;
+#        #end if
+#        #if $iface.dns_name:
+#        option host-name "$iface.dns_name";
+#        #end if
+#        option domain-name "<%= @domain %>";
+#        #if $iface.if_gateway:
+#        option routers $iface.if_gateway;
+#        #set $ns1 = '.'.join($iface.if_gateway.split('.')[:3]) + '.2'
+#        #set $ns2 = '.'.join($iface.if_gateway.split('.')[:3]) + '.3'
+#        option domain-name-servers $ns1, $ns2;
+#        #end if
+#    }
+    #end for
+}
+#end for

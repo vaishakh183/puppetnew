@@ -1,0 +1,25 @@
+---
+ensure_default_firewall: false
+ntp::servers:
+  - '0.uk.pool.ntp.org iburst'
+  - '1.pool.ntp.org iburst'
+
+ntp::restrict:
+  - 'default kod nomodify notrap nopeer noquery'
+  - '-6 default kod nomodify notrap nopeer noquery'
+  - '127.0.0.1'
+  - '172.16.0.0 mask 255.240.0.0 nomodify notrap nopeer'
+  - '10.252.64.0 mask 255.255.248.0 nomodify notrap nopeer'
+  - '103.211.218.234 mask 255.255.255.255 nomodify notrap nopeer #Cloudsites IP Whitelist'
+  - '103.224.22.240 mask 255.255.255.255 nomodify notrap nopeer'
+  - '111.118.214.69 mask 255.255.255.255 nomodify notrap nopeer'
+  - '103.50.163.142 mask 255.255.255.255 nomodify notrap nopeer'
+  - '43.225.54.108 mask 255.255.255.255 nomodify notrap nopeer'
+  - '43.225.54.116 mask 255.255.255.255 nomodify notrap nopeer'
+  - '137.59.149.130 mask 255.255.255.255 nomodify notrap nopeer'
+  - '103.211.218.200 mask 255.255.255.255 nomodify notrap nopeer #beta1-instaweb'
+  - '103.211.218.75 mask 255.255.255.255 nomodify notrap nopeer #staging1-instaweb'
+  - '103.211.217.231 mask 255.255.255.255 nomodify notrap nopeer #devcloud servers'
+  - '103.211.217.233 mask 255.255.255.255 nomodify notrap nopeer #devcloud servers'
+
+ntp::logfile: '/var/log/ntp.log'

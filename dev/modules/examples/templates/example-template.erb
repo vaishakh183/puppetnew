@@ -1,0 +1,10 @@
+#Facts in templates cabe be done @ipaddress
+#
+Hostname of Machine is <%= @hostname %>
+
+#Print Network interfaces using Loop
+### split interfaces output by , and assign each value to variable "interface" and "-" at the end will print each in different line
+#
+<% @interfaces.split(',').each do |interface| -%>      
+Interface is <%= interface %>
+<% end -%>

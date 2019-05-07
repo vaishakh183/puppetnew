@@ -1,0 +1,74 @@
+# System authorization information
+auth --enableshadow
+# System bootloader configuration
+bootloader --location=mbr
+# Partition clearing information
+clearpart --all --initlabel
+# Use text mode install
+text
+# Firewall configuration
+firewall --disabled
+# Run the Setup Agent on first boot
+firstboot --disable
+# System keyboard
+keyboard us
+# System language
+lang en_US
+# Use network installation
+url --url=$tree
+# If any cobbler repo definitions were referenced in the kickstart profile, include them here.
+$yum_repo_stanza
+repo --name=hosting-custom-el6 --baseurl=https://pulp-mum.india.endurance.com/pulp/repos/hosting-backup-rhl6-x86_64/  --noverifyssl
+# Network information
+$SNIPPET('network_config')
+# Reboot after installation
+reboot
+#Root password
+rootpw --iscrypted $1$alqDP1$piq1L9pVtpAYXt5PhnwXt/  # qwedsa@123
+# SELinux configuration
+selinux --disabled
+# Do not configure the X Window System
+skipx
+# System timezone
+timezone  UTC
+# Install OS instead of upgrade
+install
+# Clear the Master Boot Record
+zerombr
+# Partition the system
+part swap --size 4096 --ondisk sda
+part / --fstype ext4 --size 1000 --grow --ondisk sda
+# Disable unwanted services
+services --disabled auditd
+
+
+%pre
+$SNIPPET('log_ks_pre')
+$SNIPPET('kickstart_start')
+$SNIPPET('pre_install_network_config')
+# Enable installation monitoring
+$SNIPPET('pre_anamon')
+
+%packages --nobase
+e2fsprogs
+puppet
+facter
+tree
+
+%post
+$SNIPPET('log_ks_post')
+$SNIPPET('post_install_network_config')
+#Setup /dev/sdb for backup on /data
+#mkfs.ext4 -F /dev/sdb
+mkfs.ext4 -F -N 1953234944 /dev/sdb
+echo "/dev/sdb    /data    ext4    defaults    1 1" >> /etc/fstab
+mkdir /data
+mount /dev/sdb
+#Run puppet to fetch config
+/sbin/chkconfig puppet on
+ble post-install boot notification
+$SNIPPET('post_anamon')
+# Start final steps
+$SNIPPET('kickstart_done')
+# End final steps
+

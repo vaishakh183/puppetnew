@@ -1,0 +1,19 @@
+#raw
+# need to ensure anaconda doesn't screw up the drive labelling:
+label=`e2label /dev/sda1`
+if [ $label != / ] ; then
+        e2label /dev/sda1 /
+# need to switch to the new label in grub.conf as well
+        sed -i 's/\/1$/\//g' /boot/grub/grub.conf
+fi
+
+label=`e2label /dev/sda3`
+if [ $label != /home ] ; then
+        e2label /dev/sda3 /tmp
+fi
+
+label=`e2label /dev/sdb1`
+if [ $label != /home ] ; then
+        e2label /dev/sdb1 /home
+fi
+#end raw

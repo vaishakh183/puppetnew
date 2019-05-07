@@ -1,0 +1,97 @@
+# System authorization information
+auth --enableshadow
+# System bootloader configuration
+bootloader --location=mbr
+# Partition clearing information
+clearpart --all --initlabel
+# Use text mode install
+text
+# Firewall configuration
+firewall --disabled
+# Run the Setup Agent on first boot
+firstboot --disable
+# System keyboard
+keyboard us
+# System language
+lang en_US
+# Use network installation
+url --url=$tree
+# If any cobbler repo definitions were referenced in the kickstart profile, include them here.
+$yum_repo_stanza
+# Network information
+$SNIPPET('network_config')
+# Reboot after installation
+reboot
+#Root password
+rootpw --iscrypted $1$alqDP1$piq1L9pVtpAYXt5PhnwXt/  # qwedsa@123
+# SELinux configuration
+selinux --disabled
+# Do not configure the X Window System
+skipx
+# System timezone
+timezone  UTC
+# Install OS instead of upgrade
+install
+# Clear the Master Boot Record
+zerombr
+
+# Allow anaconda to partition the system as needed
+
+clearpart --all --drives sda,sdb --initlabel
+part /boot --label=/boot --fstype=ext4 --size 100 --ondisk sda
+part swap --size 4096 --label=SWAP-sda2 --ondisk sda
+part / --label=/ --fstype=ext4  --size 1000 --grow --ondisk sda
+part /var/lib/mysql --fstype=ext4 --label=/var/lib/mysql --size 1000 --grow --ondisk sdb
+
+
+%pre
+$SNIPPET('log_ks_pre')
+$SNIPPET('kickstart_start')
+$SNIPPET('pre_install_network_config')
+# Enable installation monitoring
+$SNIPPET('pre_anamon')
+
+%packages --nobase
+
+# Group: editors
+vim-enhanced
+
+# Group: Applications/Databases
+mysql-server
+mysql
+
+# Group: Development/Languages
+perl
+ruby
+ruby-libs.x86_64
+ruby-devel.x86_64
+rubygems
+rubygem-rspec
+puppet
+facter
+augeas-libs
+ruby-augeas
+ruby-shadow
+rubygem-stomp
+mcollective
+
+#Dell Omsa
+
+srvadmin-all
+
+%post
+
+echo -e "\nRunning Post Installation Script\n"
+
+# Start yum configuration
+$yum_config_stanza
+
+$SNIPPET('omsa')
+$SNIPPET('log_ks_post')
+# Enable post-install boot notification
+$SNIPPET('post_anamon')
+$SNIPPET('post_install_network_config')
+# TODO: REMEMBER TO ADD DISK CACHE DISABLING SCRIPT LATER
+# Start final steps
+$kickstart_done
+# End final steps

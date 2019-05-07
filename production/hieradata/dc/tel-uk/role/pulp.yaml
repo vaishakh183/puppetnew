@@ -1,0 +1,4 @@
+---
+hosts::host_entries:
+  'pulp-austin.india.endurance.com':
+    ip: '172.17.160.47'

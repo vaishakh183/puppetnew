@@ -1,0 +1,374 @@
+---
+profile::accounts::included_users:
+  - karthik.i
+  - riyan.a
+  - ramdass.s
+  - vijay.b
+  - madhav.k
+  - roshan.r
+  - aditya.k
+  - noel.v
+  - lalith.h
+  - bilal.k
+  - vikash.s
+  - benf
+  - shaunl
+  - rwest
+  - rdosogne
+  - dlair
+  - michaelsmith
+  - jmbushman
+  - mforeman
+  - bhoffart
+  - jcummings
+  - tlight
+
+yumrepos:
+  sysad:
+    descr: "Sysad repository"
+    ensure: present
+    baseurl: "https://pulp-mum.india.endurance.com/pulp/repos/sysad-el7_x86_64/"
+    enabled: 1
+    sslverify: 0
+    gpgcheck: 0
+  mysql56-community:
+    ensure: present
+    baseurl: "http://repo.mysql.com/yum/mysql-5.6-community/el/%{operatingsystemmajrelease}/%{architecture}"
+    descr: 'mysql56-community'
+    gpgcheck: 0
+
+packages:
+  ius-release:
+    ensure: 'installed'
+    source: 'https://dl.iuscommunity.org/pub/ius/stable/CentOS/7/x86_64/ius-release-1.0-15.ius.centos7.noarch.rpm'
+
+users:
+  logicboxes_staging_uploader:
+    ensure: 'present'
+    home: '/home/logicboxes_staging_uploader'
+    home_mode: '775'
+  phpmyadmin_staging:
+    ensure: 'present'
+    home: '/docroot/phpmyadmin_staging'
+    home_mode: '775'
+  nginx:
+    ensure: 'present'
+    home: '/var/cache/nginx'
+    home_mode: '750'
+    shell: '/sbin/nologin'
+    groups: ['logicboxes_staging_uploader', 'phpmyadmin_staging']
+
+files:
+  '/docroot':
+    ensure: 'directory'
+    recurse: true
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  '/docroot/logicboxes-sites':
+    ensure: 'directory'
+    recurse: true
+    owner: 'logicboxes_staging_uploader'
+    group: 'logicboxes_staging_uploader'
+  '/docroot/logicboxes-sites/supportmailhostbox':
+    ensure: 'directory'
+    recurse: true
+    owner: 'logicboxes_staging_uploader'
+    group: 'logicboxes_staging_uploader'
+  '/etc/ssl/wildcard.corp.endurance.com.crt':
+    source: 'puppet:///modules/profile/sysops/wildcard.corp.endurance.com.crt'
+  '/etc/ssl/wildcard.corp.endurance.com.key':
+    source: 'puppet:///modules/profile/sysops/wildcard.corp.endurance.com.key'
+
+crons:
+  'Logicboxes code sync':
+    command: 'cd /docroot/logicboxes-sites;/usr/bin/git checkout staging;/usr/bin/git stash;/usr/bin/git pull'
+    user: 'logicboxes_staging_uploader'
+    minute: '*/2'
+
+ensure_default_firewall: false
+
+php::ensure: 'present'
+php::package_prefix: 'php56u-'
+php::manage_repos: false
+php::fpm: true
+php::fpm_user: 'nginx'
+php::fpm_group: 'nginx'
+php::composer: true
+php::pear: true
+php::phpunit: false
+php::extensions:
+  mbstring: {}
+  pdo: {}
+  pecl-apcu: {}
+  mysql: {}
+  zip: {}
+
+php::settings:
+  'PHP/max_execution_time': '90'
+  'PHP/max_input_time': '300'
+  'PHP/memory_limit': '64M'
+  'PHP/post_max_size': '32M'
+  'PHP/upload_max_filesize': '32M'
+  'PHP/expose_php': Off
+
+php::fpm::pools:
+  logicboxes.corp.endurance.com:
+    listen: '127.0.0.1:9032'
+  bloglogicboxes.corp.endurance.com:
+    listen: '127.0.0.1:9030'
+  assetslogicboxes.corp.endurance.com:
+    listen: '127.0.0.1:9034'
+  logicboxesnamingservices.corp.endurance.com:
+    listen: '127.0.0.1:9033'
+  phpmyadmin.corp.endurance.com:
+    listen: '127.0.0.1:9001'
+  supportmailhostbox.corp.endurance.com:
+    listen: '127.0.0.1:9029'
+
+mysql::client::package_name: mysql-community-client
+mysql::client::package_ensure: present
+mysql::server::package_name: mysql-community-server
+mysql::server::package_ensure: present
+mysql::server::service_name: mysqld
+mysql::server::config_file: /etc/my.cnf
+mysql::server::service_enabled: true
+mysql::server::service_manage: true
+mysql::server::create_root_my_cnf: false
+mysql::server::create_root_user: false
+mysql::server::remove_default_accounts: false
+mysql::server::override_options:
+  mysqld:
+    bind-address: 0.0.0.0
+    log-error: /var/log/mysqld.log
+    pid-file: '/var/lib/mysql/rcbot-staging.gpx-mum.colo.pid'
+  mysqld_safe:
+    log_error: /var/log/mysqld.log
+    pid-file: '/var/lib/mysql/rcbot-staging.gpx-mum.colo.pid'
+
+nginx::server_tokens: 'off'
+nginx::confd_purge: true
+nginx::sendfile: 'on'
+nginx::keepalive_timeout: '65'
+nginx::ssl_protocols: 'TLSv1.2'
+nginx::ssl_ciphers: 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK'
+nginx::ssl_dhparam: '/etc/ssl/certs/dhparam.pem'
+nginx::gzip: 'on'
+nginx::gzip_proxied: 'no-cache no-store private expired auth'
+nginx::gzip_min_length: '1000'
+nginx::gzip_types: 'text/plain text/css application/xml image/png application/javascript image/jpeg'
+nginx::client_max_body_size: '32m'
+
+nginx::nginx_servers:
+  'logicboxes.corp.endurance.com_ssl':
+    server_name: ['logicboxes.corp.endurance.com']
+    ssl: true
+    ssl_port: 443
+    listen_port: 443
+    ssl_cert: '/etc/ssl/wildcard.corp.endurance.com.crt'
+    ssl_key: '/etc/ssl/wildcard.corp.endurance.com.key'
+    access_log: '/var/log/nginx/logicboxes.corp.endurance.com-access.log'
+    error_log: '/var/log/nginx/logicboxes.corp.endurance.com-error.log'
+    index_files: [index.html]
+    add_header:
+      Strict-Transport-Security: max-age=63072000; includeSubDomains;
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+    use_default_location: false
+    locations:
+      '= /':
+        location_cfg_append:
+          root: '/docroot/logicboxes-sites/logicboxes_com/web'
+          index: 'index.php index.html'
+      '~* \.(jpg|jpeg|gif|css|png|js|ico)$':
+        location_cfg_append:
+          root: '/docroot/logicboxes-sites/logicboxes_com/web'
+          index: 'index.php index.html'
+          expires: '30d'
+      '~ /\.ht':
+        location_cfg_append:
+          deny: 'all'
+    raw_append: ["\n  location / {\n    root /docroot/logicboxes-sites/logicboxes_com/web;\n index index.php;\n  if ( $request_uri ~ \"^/index.php?\" ) {\n rewrite ^ / permanent;\n }\n if (!-e $request_filename) {\n rewrite  ^/(.*)$  /index.php?q=$1  last;\n break;\n }\n if ($request_method = 'GET') {\n set $http_origin 'garr607692.supersite2.myorderbox.com';\n add_header 'Access-Control-Allow-Origin' '$http_origin';\n add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';\n add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';\n add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';\n }\n  }", "\n location  /signup {\n try_files $uri $uri/ /signup/index.php?$query_string;\n}", "\n location  /files {\n alias  /docroot/logicboxes-sites/logicboxes_com/web/sites/default/files/resources/files;\n expires 30d;\n}", "\n location /rc-mailers {\n alias  /docroot/resellerclub-sites/hostgator_india/web/sites/default/files/rc-mailer;\n expires 30d;\n index index.html;\n}",  "\n location ~ ^/(status|ping)$ {\n fastcgi_pass   127.0.0.1:9032;\n include /etc/nginx/fastcgi_params;\n fastcgi_param  SCRIPT_FILENAME  /docroot/logicboxes-sites/logicboxes_com/web/$fastcgi_script_name;\nallow 127.0.0.1;\ndeny all;\n}", "\n location ~ .php$ {\n  root   /docroot/logicboxes-sites/logicboxes_com/web/;\n fastcgi_pass   127.0.0.1:9032;\nfastcgi_index  index.php;\ninclude /etc/nginx/fastcgi_params;\nfastcgi_param  SCRIPT_FILENAME  /docroot/logicboxes-sites/logicboxes_com/web/$fastcgi_script_name;\n}", "\n location /sitemap.xml {\n root  /docroot/logicboxes-sites/logicboxes_com/web ;\n expires 30d;\n index sitemap.xml;\n }", "\n location /robots.txt {\n root  /docroot/logicboxes-sites/logicboxes_com/web;\n expires 30d;\n index robots.txt;\n }"]
+  'logicboxes.corp.endurance.com_nonssl':
+    server_name: ['logicboxes.corp.endurance.com']
+    rewrite_rules:  ['^/(.*)$ https://$host/$1 permanent']
+  'cctldlogicboxes.corp.endurance.com':
+    server_name: ['cctldlogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  http://logicboxes.corp.endurance.com/registries permanent']
+  'cctldslogicboxes.corp.endurance.com':
+    server_name: ['cctldslogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  https://logicboxes.corp.endurance.com/registries permanent']
+  'elitelogicboxes.corp.endurance.com':
+    server_name: ['elitelogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  https://logicboxes.corp.endurance.com/elite-reseller-program permanent']
+  'walletlogicboxes.corp.endurance.com':
+    server_name: ['walletlogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  https://logicboxes.corp.endurance.com/registry-wallet permanent']
+  'newgtldslogicboxes.corp.endurance.com':
+    server_name: ['newgtldslogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  https://logicboxes.corp.endurance.com/new-gtld-applicants permanent']
+  'newgtldlogicboxes.corp.endurance.com':
+    server_name: ['newgtldlogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  http://logicboxes.corp.endurance.com/new-gtld-applicants permanent']
+  'eig-reportslogicboxes.corp.endurance.com':
+    server_name: ['eig-reportslogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  https://logicboxes.corp.endurance.com/eig-data-reports/index.html permanent']
+  'registrarlogicboxes.corp.endurance.com':
+    server_name: ['registrarlogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  https://logicboxes.corp.endurance.com/icann-registrar-automation-solutions/?utm_source=direct&utm_medium=fwd&utm_campaign=rtrar-lb-com permanent']
+  'labslogicboxes.corp.endurance.com':
+    server_name: ['labslogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  https://logicboxes.corp.endurance.com/labs permanent']
+  'sitelocklogicboxes.corp.endurance.com':
+    server_name: ['sitelocklogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^  https://logicboxes.corp.endurance.com/sitelock permanent']
+  'bloglogicboxes.corp.endurance.com_ssl':
+    server_name: ['bloglogicboxes.corp.endurance.com']
+    ssl: true
+    ssl_port: 443
+    listen_port: 443
+    ssl_cert: '/etc/ssl/wildcard.corp.endurance.com.crt'
+    ssl_key: '/etc/ssl/wildcard.corp.endurance.com.key'
+    access_log: '/var/log/nginx/bloglogicboxes.corp.endurance.com-access.log'
+    error_log: '/var/log/nginx/bloglogicboxes.corp.endurance.com-error.log'
+    index_files: [index.html]
+    add_header:
+      Strict-Transport-Security: max-age=63072000; includeSubDomains;
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+    use_default_location: false
+    locations:
+      'blog_root':
+        location: '= /'
+        location_cfg_append:
+          root: '/docroot/logicboxes-sites/blog/web'
+          index: 'index.php index.html'
+      'blog_images':
+        location: '~* \.(jpg|jpeg|gif|css|png|js|ico)$'
+        location_cfg_append:
+          root: ' /docroot/logicboxes-sites/blog/web'
+          expires: '30d'
+      'blog_ht':
+        location: '~ /\.ht'
+        location_cfg_append:
+          deny: 'all'
+    raw_append: ["\n  location / {\n    root /docroot/logicboxes-sites/blog/web;\n index index.php;\n  if ( $request_uri ~ \"^/index.php?\" ) {\n rewrite ^ / permanent;\n }\n if (!-e $request_filename) {\n rewrite  ^/(.*)$  /index.php?q=$1  last;\n break;\n }\n  }",  "\n location  /files {\n alias  /docroot/logicboxes-sites/blog/web/sites/default/files/resources/files;\n expires 30d;\n}", "\n location  ^~ /mailers {\n alias  /docroot/logicboxes-sites/blog/web/sites/default/files/resources/mailers;\n expires 30d;\n}", "\n location /rc-mailers {\n alias  /docroot/resellerclub-sites/hostgator_india/web/sites/default/files/rc-mailer;\n expires 30d;\n index index.html;\n}",  "\n location ~ ^/(status|ping)$ {\n fastcgi_pass   127.0.0.1:9030;\n include /etc/nginx/fastcgi_params;\n fastcgi_param  SCRIPT_FILENAME  /docroot/logicboxes-sites/blog/web/$fastcgi_script_name;\nallow 127.0.0.1;\ndeny all;\n}", "\n location ~ .php$ {\n  root   /docroot/logicboxes-sites/blog/web;\n fastcgi_pass   127.0.0.1:9030;\nfastcgi_index  index.php;\ninclude /etc/nginx/fastcgi_params;\nfastcgi_param  SCRIPT_FILENAME  /docroot/logicboxes-sites/blog/web/$fastcgi_script_name;\n}", "\n location /sitemap.xml {\n root  /docroot/logicboxes-sites/blog/web ;\n expires 30d;\n index sitemap.xml;\n }", "\n location /robots.txt {\n root  /docroot/logicboxes-sites/blog/web;\n expires 30d;\n index robots.txt;\n }"]
+  'bloglogicboxes.corp.endurance.com_nonssl':
+    server_name: ['bloglogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^/(.*)$ https://$host/$1 permanent']
+  'assetslogicboxes.corp.endurance.com_ssl':
+    server_name: ['assetslogicboxes.corp.endurance.com']
+    ssl: true
+    ssl_port: 443
+    listen_port: 443
+    ssl_cert: '/etc/ssl/wildcard.corp.endurance.com.crt'
+    ssl_key: '/etc/ssl/wildcard.corp.endurance.com.key'
+    access_log: '/var/log/nginx/assetslogicboxes.corp.endurance.com-access.log'
+    error_log: '/var/log/nginx/assetslogicboxes.corp.endurance.com-error.log'
+    index_files: [index.html]
+    add_header:
+      Strict-Transport-Security: max-age=63072000; includeSubDomains;
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+    use_default_location: false
+    locations:
+      'assets_root':
+        location: '= /'
+        location_cfg_append:
+          root: '/docroot/logicboxes-sites/assets/web'
+          index: 'index.php index.html'
+      'assets_images':
+        location: '~* \.(jpg|jpeg|gif|css|png|js|ico)$'
+        location_cfg_append:
+          root: '/docroot/logicboxes-sites/assets/web'
+          expires: '30d'
+      'assets_ht':
+        location: '~ /\.ht'
+        location_cfg_append:
+          deny: 'all'
+    raw_append: ["\n  location / {\n    root /docroot/logicboxes-sites/assets/web;\n index index.php index.html;\n   if (!-e $request_filename) {\n rewrite  ^/(.*)$  /index.php?q=$1  last;\n break;\n }\n  }",   "\n location ~ ^/(status|ping)$ {\n fastcgi_pass   127.0.0.1:9034;\n include /etc/nginx/fastcgi_params;\n fastcgi_param  SCRIPT_FILENAME  /docroot/logicboxes-sites/assets/web/$fastcgi_script_name;\n}"]
+  'assetslogicboxes.corp.endurance.com_nonssl':
+    server_name: ['assetslogicboxes.corp.endurance.com']
+    rewrite_rules:  ['^/(.*)$ https://$host/$1 permanent']
+  'logicboxesnamingservices.corp.endurance.com':
+    server_name: ['logicboxesnamingservices.corp.endurance.com']
+    access_log: '/var/log/nginx/logicboxesnamingservices.corp.endurance.com-access.log'
+    error_log: '/var/log/nginx/logicboxesnamingservices.corp.endurance.com-error.log'
+    index_files: [index.html]
+    add_header:
+      Strict-Transport-Security: max-age=63072000; includeSubDomains;
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+    use_default_location: false
+    locations:
+      'lbns_root':
+        location: '= /'
+        location_cfg_append:
+          root: '/docroot/logicboxes-sites/logicboxesnamingservices/web'
+          index: 'index.php index.html'
+      'lbns_images':
+        location: '~* \.(jpg|jpeg|gif|css|png|js|ico)$'
+        location_cfg_append:
+          root: ' /docroot/logicboxes-sites/logicboxesnamingservices/web'
+          expires: '30d'
+      'lbns_ht':
+        location: '~ /\.ht'
+        location_cfg_append:
+          deny: 'all'
+    raw_append: ["\n  location / {\n    root /docroot/logicboxes-sites/logicboxesnamingservices/web;\n index index.php;\n  if ( $request_uri ~ \"^/index.php?\" ) {\n rewrite ^ / permanent;\n }\n if (!-e $request_filename) {\n rewrite  ^/(.*)$  /index.php?q=$1  last;\n break;\n }\n  }",  "\n location  /files {\n alias  /docroot/logicboxes-sites/logicboxesnamingservices/web/sites/default/files/resources/files;\n expires 30d;\n}", "\n location ^~ /mailers {\n alias  /docroot/logicboxes-sites/logicboxesnamingservices/web/sites/default/files/resources/mailers;\n expires 30d;\n}","\n location /rc-mailers {\n alias  /docroot/resellerclub-sites/hostgator_india/web/sites/default/files/rc-mailer;\n expires 30d;\n index index.html;\n}",  "\n location ~ ^/(status|ping)$ {\n fastcgi_pass   127.0.0.1:9033;\n include /etc/nginx/fastcgi_params;\n fastcgi_param  SCRIPT_FILENAME  /docroot/logicboxes-sites/logicboxesnamingservices/web/$fastcgi_script_name;\nallow 127.0.0.1;\ndeny all;\n}", "\n location ~ .php$ {\n  root   /docroot/logicboxes-sites/blog/web;\n fastcgi_pass   127.0.0.1:9033;\nfastcgi_index  index.php;\ninclude /etc/nginx/fastcgi_params;\nfastcgi_param  SCRIPT_FILENAME  /docroot/logicboxes-sites/logicboxesnamingservices/web/$fastcgi_script_name;\n}", "\n location /sitemap.xml {\n root /docroot/logicboxes-sites/logicboxesnamingservices/web ;\n expires 30d;\n index sitemap.xml;\n }", "\n location /robots.txt {\n root  /docroot/logicboxes-sites/logicboxesnamingservices/web;\n expires 30d;\n index robots.txt;\n }"]
+  'phpmyadmin.corp.endurance.com':
+    server_name: ['phpmyadmin.corp.endurance.com']
+    listen_port: 8080
+    access_log: '/var/log/nginx/phpmyadmin.corp.endurance.com-access.log'
+    error_log: '/var/log/nginx/phpmyadmin.corp.endurance.com-error.log'
+    index_files: [index.html]
+    add_header:
+      Strict-Transport-Security: max-age=63072000; includeSubDomains;
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+    use_default_location: false
+    locations:
+      'pma_root':
+        location: '/'
+        location_cfg_append:
+          root: '/docroot/phpmyadmin_staging'
+          index: 'index.php index.html'
+      'pma_phpcnf':
+        location: '~ \.php$'
+        location_cfg_append:
+          root: '/docroot/phpmyadmin_staging'
+          index: 'index.php index.html'
+          fastcgi_pass: '127.0.0.1:9001'
+          fastcgi_index: 'index.php'
+          include: '/etc/nginx/fastcgi_params'
+          fastcgi_param: 'SCRIPT_FILENAME  /docroot/phpmyadmin_staging/$fastcgi_script_name'
+  'supportmailhostbox.corp.endurance.com':
+    server_name: ['supportmailhostbox.corp.endurance.com']
+    listen_port: 80
+    access_log: '/var/log/nginx/supportmailhostbox.corp.endurance.com-access.log'
+    error_log: '/var/log/nginx/supportmailhostbox.corp.endurance.com-error.log'
+    index_files: [index.html]
+    add_header:
+      Strict-Transport-Security: max-age=63072000; includeSubDomains;
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+    use_default_location: false
+    locations:
+      'sm_root':
+        location: '= /'
+        location_cfg_append:
+          root: '/docroot/logicboxes-sites/supportmailhostbox/web'
+          index: 'index.php index.html'
+      'sm_images':
+        location: '~* \.(jpg|jpeg|gif|css|png|js|ico)$'
+        location_cfg_append:
+          root: ' /docroot/logicboxes-sites/supportmailhostbox/web'
+          expires: '30d'
+      'sm_ht':
+        location: '~ /\.ht'
+        location_cfg_append:
+          deny: 'all'
+    raw_append: ["\n  location / {\n    root /docroot/logicboxes-sites/supportmailhostbox/web;\n index index.php;\n  if ( $request_uri ~ \"^/index.php?\" ) {\n rewrite ^ / permanent;\n }\n if (!-e $request_filename) {\n rewrite  ^/(.*)$  /index.php?q=$1  last;\n break;\n }\n  }",  "\n location  /files {\n alias  /docroot/logicboxes-sites/supportmailhostbox/web/sites/default/files/resources/files;\n expires 30d;\n}", "\n location ^~ /mailers {\n alias  /docroot/logicboxes-sites/supportmailhostbox/web/sites/default/files/resources/mailers;\n expires 30d;\n}","\n location /rc-mailers {\n alias  /docroot/resellerclub-sites/hostgator_india/web/sites/default/files/rc-mailer;\n expires 30d;\n index index.html;\n}",  "\n location ~ ^/(status|ping)$ {\n fastcgi_pass   127.0.0.1:9029;\n include /etc/nginx/fastcgi_params;\n fastcgi_param  SCRIPT_FILENAME  /docroot/logicboxes-sites/supportmailhostbox/web/$fastcgi_script_name;\nallow 127.0.0.1;\ndeny all;\n}", "\n location ~ .php$ {\n  root   /docroot/logicboxes-sites/supportmailhostbox/web;\n fastcgi_pass   127.0.0.1:9033;\nfastcgi_index  index.php;\ninclude /etc/nginx/fastcgi_params;\nfastcgi_param  SCRIPT_FILENAME  /docroot/logicboxes-sites/supportmailhostbox/web/$fastcgi_script_name;\n}", "\n location /sitemap.xml {\n root /docroot/logicboxes-sites/supportmailhostbox/web ;\n expires 30d;\n index sitemap.xml;\n }", "\n location /robots.txt {\n root  /docroot/logicboxes-sites/supportmailhostbox/web;\n expires 30d;\n index robots.txt;\n }"]
+
+
+profile::nessusagent::groups: 'APAC_mainsites_billing'

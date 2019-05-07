@@ -1,0 +1,156 @@
+---
+ensure_default_firewall: false
+
+packages:
+  iptables-services:
+    ensure: 'present'
+  perl-Net-DNS:
+    ensure: 'present'
+
+services:
+  'iptables':
+    ensure: 'stopped'
+    enable: 'false'
+    require: Package[iptables-services]
+  'ip6tables':
+    ensure: 'stopped'
+    enable: 'false'
+    require: Package[iptables-services]
+  'firewalld':
+    ensure: 'stopped'
+    enable: 'false'
+
+logrhythm::logrhythm_server: "108.179.255.232"
+
+icinga2::manage_repo: true
+icinga2::confd: '/etc/icinga2/api/*.conf'
+icinga2::features: ['checker', 'mainlog', 'command', 'api', 'livestatus', 'debuglog']
+
+icinga2::feature::api::accept_commands: true
+icinga2::feature::api::accept_config: true
+icinga2::feature::api::pki: 'icinga2'
+icinga2::feature::api::ca_host: '172.23.160.46'
+icinga2::feature::livestatus::socket_type: 'tcp'
+
+profile::accounts::ldap_sync::included_users:
+  - ganapathi.b 
+  - shashank.v
+  - vishak.v
+  - sudhir.g
+  - jayaraj.k
+  - sharath.k
+  - bhargav.s
+  - rajesh.h
+  - uta
+
+users:
+  nagios:
+    ensure: 'present'
+    sshkeys: ['ssh-dss AAAAB3NzaC1kc3MAAACBAI2dCusZ6KwJegzdNESRhhfBxy6Xx8TC2uMfYSmcCoiLQQlbgXYFA3ezsqeczzr6SQScXGkiR/yFAVv/t08bR06rHuPXvhKtueYhQdeaWqgpIs5znMNbnPUEJzslA7FGgQAWvCnyZaZBqP2/iSeykVx0Y0JjYqkTC1Ef4kW8eNDNAAAAFQC0GSodGjJLnce4AyQcDg6hqh2D2wAAAIAoF4O97aNgLNvpI+YKfPVTVy8FgnnS13bRuAKhTUweyKwjQGAvGoqd1I8lkK7iRZfQDFHslXjfKS5cc53/+6Nt6e7eXuBaxmOZ+0HyMmORHkGhIa6FyX6xBK36uk0re2aKCM2SNDEFgW3tDnvh9JSpL7+s5ISLy6aoHk3SbCtNVwAAAIAcnkAsVd0KWRUi3L2ROdLuGkDkjlcDGOKpTZfT/ObN3VN3CsQdcEy2xY31zlGPSYZ4l5sVdCnTZQ0PS+Uwa4muDgfXk9pyHaTdoKS+t/Hu2iwl2o4FYDvnT0+DQuHDQjP7VoePdBefq6Cmijj3uEZ/LrqWSP+N3hDz9OSbnMNDXg== icinga']
+
+files:
+  '/etc/icinga2/api':
+    ensure: 'directory'
+    owner: 'icinga'
+    group: 'icinga'
+    mode: '0750'
+    tag: 'icinga2::config::file'
+
+auditd::main_rules:
+  - '-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change'
+  - '-a always,exit -F arch=b32 -S clock_settime -k time-change'
+  - '-w /etc/localtime -p wa -k time-change'
+  - '-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change'
+  - '-a always,exit -F arch=b64 -S clock_settime -k time-change'
+  - '-w /etc/group -p wa -k identity'
+  - '-w /etc/passwd -p wa -k identity'
+  - '-w /etc/gshadow -p wa -k identity'
+  - '-w /etc/shadow -p wa -k identity'
+  - '-w /etc/security/opasswd -p wa -k identity'
+  - '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale'
+  - '-w /etc/issue -p wa -k system-locale'
+  - '-w /etc/issue.net -p wa -k system-locale'
+  - '-w /etc/hosts -p wa -k system-locale'
+  - '-w /etc/sysconfig/network -p wa -k system-locale'
+  - '-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale'
+  - '-w /etc/selinux/ -p wa -k MAC-policy'
+  - '-w /var/run/faillock/ -p wa -k logins'
+  - '-w /var/log/lastlog -p wa -k logins'
+  - '-w /var/run/utmp -p wa -k session'
+  - '-w /var/log/wtmp -p wa -k session'
+  - '-w /var/log/btmp -p wa -k session'
+  - '-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts'
+  - '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts'
+  - '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete'
+  - '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete'
+  - '-w /etc/sudoers -p wa -k scope'
+  - '-w /etc/sudoers.d -p wa -k scope'
+  - '-w /var/log/sudo.log -p wa -k actions'
+  - '-w /sbin/insmod -p x -k modules'
+  - '-w /sbin/rmmod -p x -k modules'
+  - '-w /sbin/modprobe -p x -k modules'
+  - '-a always,exit -F arch=b32 -S init_module -S delete_module -k modules'
+  - '-a always,exit -F arch=b64 -S init_module -S delete_module -k modules'
+auditd::finalize_rules:
+  - '-e 1'
+
+profile::nagios::client::custom_plugins:
+  - 'check_rw_mountpoints.pl'
+  - 'check_axfr'
+  - 'check_by_ssh.sh'
+  - 'check_zones.py'
+  - 'juniper_alarm.sh'
+  - 'slant-enqueue.py'
+  - 'check_ganglia.py'
+  - 'check_mysql-replication.pl'
+  - 'check_snmp_traffic_neustar.sh'
+  - 'check_snmp_traffic.sh'
+  - 'check_bgpstate.pl'
+  - 'check_apachestatus.pl'
+  - 'check_pingjsp'
+  - 'check_pingjsp_temp'
+  - 'check_ganglia_percentile'
+  - 'check_bgp.pl'
+  - 'juniper_alarm_tx.sh'
+  - 'check_mysql_slavestatus.sh'
+  - 'check_mysql_query.sh'
+  - 'check_mysql_slavestatus'
+  - 'check_CPU_usage.sh'
+  - 'check_puppet_new'
+  - 'check_ftp_win.pl'
+  - 'check_imap_win'
+  - 'check_pop_win'
+  - 'check_ntp_new.sh'
+  - 'check_obox_subnet.pl'
+  - 'check_active_pooler'
+  - 'check_ftps.sh'
+  - 'check_a_record.sh'
+  - 'check_https_tls.sh'
+  - 'check_tftp.sh'
+  - 'check_juniper_uptime.sh'
+  - 'eh_by_ssh.sh'
+  - 'hardwareAvailable.py'
+  - 'serverAvailable.py'
+  - 'check_tomcat.py'
+  - 'dedibll_health.py'
+  - 'check_puppetmaster.sh'
+  - 'stuckAction.py'
+  - 'check_mysqlslave.sh'
+  - 'cluster_check_parse.py'
+  - 'check_rabbitmq.py'
+  - 'check_glance_api'
+  - 'check_keystone'
+  - 'check_neutron_api'
+  - 'check_nova_api'
+  - 'check_openstack_agentsdedi'
+  - 'check_whois'

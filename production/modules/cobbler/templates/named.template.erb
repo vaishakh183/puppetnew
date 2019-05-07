@@ -1,0 +1,32 @@
+acl "trusted" {
+    <%= @named_acl_trusted.join(";\n    ") %>;
+    172.16.0.0/12;
+    localnets;
+    localhost;
+};
+
+options {
+    directory "/var/named";
+    version "get lost";
+    forwarders {
+        8.8.8.8;
+        8.8.4.4;
+    };
+    forward only;
+    allow-recursion { trusted; };
+    allow-query-cache { trusted; };
+};
+
+#for $zone in $forward_zones
+zone "${zone}." {
+    type master;
+    file "$zone";
+};
+#end for
+
+#for $zone, $arpa in $reverse_zones
+zone "${arpa}." {
+    type master;
+    file "$zone";
+};
+#end for

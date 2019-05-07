@@ -1,0 +1,90 @@
+---
+apache::vhost: 
+  my.hostgator.in:
+    servername: 'my.hostgator.in'
+    port: '80'
+    docroot: '/var/www/hgi-cp/public'
+    docroot_owner: 'app-uploader'
+    docroot_group: 'apache'
+    directories:
+      path: '/var/www/hgi-cp/public'
+      headers: 
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+      allow_override: 'None'
+      options:
+       - '-Indexes'
+       - '-MultiViews'
+       - '-Includes'
+      rewrites:
+        - rewrite_cond:
+           - '%%{}{HTTP:X-Forwarded-Proto} !https'
+        - rewrite_cond:
+           - '%%{}{HTTP_USER_AGENT} !^ELB-HealthChecker'
+        - rewrite_rule:
+           - '(.*) https://%%{}{HTTP_HOST}%%{}{REQUEST_URI} [L,R=301]'
+        - rewrite_cond: 
+           - '%%{}{HTTP:Authorization} .'
+        - rewrite_rule:
+           -  '.* - [E=HTTP_AUTHORIZATION:%%{}{HTTP:Authorization}]'
+        - rewrite_cond: 
+           - '%%{}{REQUEST_FILENAME} !-f'
+           - '%%{}{REQUEST_FILENAME} !-d'
+        - rewrite_rule: 
+           - "^(.*)$ / [R=301,L]"
+    filters:
+      - 'AddOutputFilterByType DEFLATE text/plain'
+      - 'AddOutputFilterByType DEFLATE text/html'
+      - 'AddOutputFilterByType DEFLATE text/xml'
+      - 'AddOutputFilterByType DEFLATE text/css'
+      - 'AddOutputFilterByType DEFLATE application/js'
+      - 'AddOutputFilterByType DEFLATE application/javascript'
+      - 'AddOutputFilterByType DEFLATE application/x-javascript'
+  support-domains.hostgator.in:
+    servername: 'support-domains.hostgator.in'
+    port: '80'
+    docroot: '/var/www/hgi-cp/public'
+    docroot_owner: 'app-uploader'
+    docroot_group: 'apache'
+    directories:
+      path: '/var/www/hgi-cp/public'
+      headers:
+        - 'set Access-Control-Allow-Origin "*"'
+        - 'set Access-Control-Allow-Methods "*"'
+        - 'set Access-Control-Allow-Headers "*"'
+        - 'always append X-Frame-Options SAMEORIGIN'
+        - 'set X-XSS-Protection "1; mode=block"'
+        - 'edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure'
+      allow_override: 'None'
+      options:
+       - '-Indexes'
+       - '-MultiViews'
+       - '-Includes'
+      rewrites:
+        - rewrite_cond:
+           - '%%{}{HTTP:X-Forwarded-Proto} !https'
+        - rewrite_cond:
+           - '%%{}{HTTP_USER_AGENT} !^ELB-HealthChecker'
+        - rewrite_rule:
+           - '(.*) https://%%{}{HTTP_HOST}%%{}{REQUEST_URI} [L,R=301]'
+        - rewrite_cond:
+           - '%%{}{HTTP:Authorization} .'
+        - rewrite_rule:
+           -  '.* - [E=HTTP_AUTHORIZATION:%%{}{HTTP:Authorization}]'
+        - rewrite_cond:
+           - '%%{}{REQUEST_FILENAME} !-f'
+           - '%%{}{REQUEST_FILENAME} !-d'
+        - rewrite_rule:
+           - "^(.*)$ / [R=301,L]"
+    filters:
+      - 'AddOutputFilterByType DEFLATE text/plain'
+      - 'AddOutputFilterByType DEFLATE text/html'
+      - 'AddOutputFilterByType DEFLATE text/xml'
+      - 'AddOutputFilterByType DEFLATE text/css'
+      - 'AddOutputFilterByType DEFLATE application/js'
+      - 'AddOutputFilterByType DEFLATE application/javascript'
+      - 'AddOutputFilterByType DEFLATE application/x-javascript'

@@ -1,0 +1,24 @@
+---
+yumrepos:
+  sysad:
+    descr: "Sysad repository"
+    ensure: present
+    baseurl: "https://pulp.tel-uk.colo/pulp/repos/sysad-el7_x86_64/"
+    enabled: 1
+    sslverify: false
+    gpgcheck: 0
+
+resolv_conf::nameservers:
+    - 172.21.40.4
+    - 172.21.40.25
+
+tcpwrappers::allow:
+  'allow_sentinel':
+    client_list: ['172.21.40.29','172.21.40.32']
+    daemon_list: 'sshd'
+    order: '22_sshd_all'
+    comment: 'Allow Sentinel boxes to ssh on this server'
+
+ntp::servers:
+  - 172.21.40.26
+  - 172.21.40.31

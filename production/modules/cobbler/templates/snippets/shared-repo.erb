@@ -1,0 +1,175 @@
+#raw
+
+AUSTIN="$(hostname -s | cut -d '-' -f1)"
+Others="$(hostname -s | cut -d '-' -f1,-2)"
+
+
+#UK
+if [ "$Others" == "cp-uk" -o "$Others" == "md-uk" -o  "$Others" == "bh-uk" ];
+then
+cat <<\EOF > /etc/yum.repos.d/sysad-x86_64.repo
+[sysad]
+name=Directi sysad repository
+gpgcheck=0
+enabled=1
+baseurl=https://pulp.tel-uk.colo/pulp/repos/sysad-el6_x86_64/
+metadata_expire=1800
+sslverify=false
+EOF
+cat <<\EOF > /etc/yum.repos.d/hosting-custom-rhl6-86_64
+[hosting-custom-rhl6-86_64]
+name=hosting-custom-rhl6-86_64
+gpgcheck=0
+enabled=1
+baseurl=https://pulp.tel-uk.colo/pulp/repos/hosting-custom-rhl6-86_64/
+metadata_expire=1800
+sslverify=false
+EOF
+cat <<\EOF > /etc/yum.repos.d/epel.repo
+[epel]
+name=Extra Packages for Enterprise Linux 6 - $basearch
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=epel-6&arch=$basearch
+gpgcheck=0
+exclude=puppet,facter,opendkim,libopendkim,ucarp,mod_security,mod_sed,ganglia,ganglia-gmond
+EOF
+cat <<\EOF > /etc/yum.repos.d/Centos-6.repo
+[Centos-6]
+name=Centos-6
+baseurl=http://mirrors.unifiedlayer.com/centos/6/os/x86_64
+enabled=1
+priority=99
+gpgcheck=0
+EOF
+
+
+
+#HK
+elif [ "$Others" == "cp-hk" -o "$Others" == "md-hk" -o  "$Others" == "bh-hk" ];
+then
+cat <<\EOF > /etc/yum.repos.d/sysad-x86_64.repo
+[sysad]
+name=Directi sysad repository
+gpgcheck=0
+enabled=1
+baseurl=https://pulp-hk.india.endurance.com/pulp/repos/sysad-el6_x86_64/
+metadata_expire=1800
+sslverify=false
+EOF
+
+cat <<\EOF > /etc/yum.repos.d/hosting-custom-rhl6-86_64.repo
+[hosting-custom-rhl6-86_64]
+name=hosting-custom-rhl6-86_64
+gpgcheck=0
+enabled=1
+baseurl=https://pulp-hk.india.endurance.com/pulp/repos/hosting-custom-rhl6-86_64/
+metadata_expire=1800
+sslverify=false
+EOF
+
+cat <<\EOF > /etc/yum.repos.d/epel.repo
+[epel]
+name=Extra Packages for Enterprise Linux 6 - $basearch
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=epel-6&arch=$basearch
+gpgcheck=0
+exclude=puppet,facter,opendkim,libopendkim,ucarp,mod_security,mod_sed,ganglia,ganglia-gmond
+EOF
+
+cat <<\EOF > /etc/yum.repos.d/Centos-6.repo
+[Centos-6]
+name=Centos-6
+baseurl=http://mirrors.unifiedlayer.com/centos/6/os/x86_64
+enabled=1
+priority=99
+gpgcheck=0
+EOF
+
+
+
+#GPX
+elif [ "$Others" == "cp-in" -o "$Others" == "md-in" -o "$Others" == "bh-in" ];
+then
+cat <<\EOF > /etc/yum.repos.d/sysad-x86_64.repo
+[sysad]
+name=Directi sysad repository
+gpgcheck=0
+enabled=1
+baseurl=https://pulp-mum.india.endurance.com/pulp/repos/sysad-el6_x86_64/
+metadata_expire=1800
+sslverify=false
+EOF
+
+
+
+cat <<\EOF > /etc/yum.repos.d/hosting-custom-rhl6-86_64.repo
+[hosting-custom-rhl6-86_64]
+name=hosting-custom-rhl6-86_64
+gpgcheck=0
+enabled=1
+baseurl=https://pulp-mum.india.endurance.com/pulp/repos/hosting-custom-rhl6-86_64/
+metadata_expire=1800
+sslverify=false
+EOF
+
+cat <<\EOF > /etc/yum.repos.d/epel.repo
+[epel]
+name=Extra Packages for Enterprise Linux 6 - $basearch
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=epel-6&arch=$basearch
+gpgcheck=0
+exclude=puppet,facter,opendkim,libopendkim,ucarp,mod_security,mod_sed,ganglia,ganglia-gmond
+EOF
+
+cat <<\EOF > /etc/yum.repos.d/Centos-6.repo
+[Centos-6]
+name=Centos-6
+baseurl=http://mirrors.unifiedlayer.com/centos/6/os/x86_64
+enabled=1
+priority=99
+gpgcheck=0
+EOF
+
+
+
+
+#Austin
+elif [ "$AUSTIN" == "cp" -o "$AUSTIN" == "md" -o  "$AUSTIN" == "bh" ];
+then
+cat <<\EOF > /etc/yum.repos.d/sysad-x86_64.repo
+[sysad]
+name=Directi sysad repository
+gpgcheck=0
+enabled=1
+baseurl=https://pulp-austin.india.endurance.com/pulp/repos/sysad-el6_x86_64/
+metadata_expire=1800
+sslverify=false
+EOF
+
+cat <<\EOF > /etc/yum.repos.d/hosting-custom-rhl6-86_64.repo
+[hosting-custom-rhl6-86_64]
+name=hosting-custom-rhl6-86_64
+gpgcheck=0
+enabled=1
+baseurl=https://pulp-austin.india.endurance.com/pulp/repos/hosting-custom-rhl6-86_64/
+metadata_expire=1800
+sslverify=false
+EOF
+
+cat <<\EOF > /etc/yum.repos.d/epel.repo
+[epel]
+name=Extra Packages for Enterprise Linux 6 - $basearch
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=epel-6&arch=$basearch
+gpgcheck=0
+exclude=puppet,facter,opendkim,libopendkim,ucarp,mod_security,mod_sed,ganglia,ganglia-gmond
+EOF
+
+cat <<\EOF > /etc/yum.repos.d/Centos-6.repo
+[Centos-6]
+name=Centos-6
+baseurl=http://mirrors.unifiedlayer.com/centos/6/os/x86_64
+enabled=1
+priority=99
+gpgcheck=0
+EOF
+
+fi
+
+#end raw

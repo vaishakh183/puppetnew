@@ -1,0 +1,89 @@
+packages:
+  lsyncd:
+    ensure: 'installed'
+
+services:
+  'lsyncd':
+    ensure: 'running'
+
+files:
+  '/etc/lsyncd.conf':
+    source: 'puppet:///modules/profile/blogsite/lsyncd.conf'
+    notify: Service[lsyncd]
+  '/etc/constantcontact.exclude':
+    source: 'puppet:///modules/profile/blogsite/constantcontact.exclude'
+    notify: Service[lsyncd]
+  '/usr/local/sbin/daily-backup.sh':
+    source: 'puppet:///modules/profile/blogsite/blogsite-1-daily-backup.sh'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
+crons:
+  'daily-backup':
+    command: '/usr/local/sbin/daily-backup.sh'
+    user: 'root'
+    hour: '01'
+    minute: '00'
+
+mysql::server::override_options:
+  mysqld:
+    server-id: 1
+    auto-increment-increment: 2
+    auto-increment-offset: 1
+
+firewall_rules:
+  allow_lsync:
+    name: '650 allow lsync traffic from blogsite-2'
+    dport: '22'
+    proto: 'tcp'
+    source: '103.76.228.215'
+    action: 'accept'
+  allow_mysql_replication:
+    name: '651 allow mysql replication traffic from blogsite-2'
+    dport: '3310'
+    proto: 'tcp'
+    source: '103.76.228.215'
+    action: 'accept'
+  allow_haproxy_mysqlchk:
+    name: '652 allow haproxy mysqlchk traffic from blogsite-2'
+    dport: '8306'
+    proto: 'tcp'
+    source: '103.76.228.215'
+    action: 'accept'
+  allow_mysql_replication_out:
+    name: '653 allow mysql replication traffic from blogsite-2'
+    dport: '3310'
+    chain: 'OUTPUT'
+    proto: 'tcp'
+    destination: '103.76.228.215'
+    action: 'accept'
+  allow_haproxy_mysqlchk_out:
+    name: '654 allow haproxy mysqlchk traffic from blogsite-2'
+    dport: '8306'
+    chain: 'OUTPUT'
+    proto: 'tcp'
+    destination: '103.76.228.215'
+    action: 'accept'
+
+tcpwrappers::allow:
+  'allow_blogsite2_ssh':
+    client_list: ['103.76.228.215']
+    daemon_list: 'sshd'
+    order: '22_sshd_blogsite'
+    comment: 'Allow ssh from blogsite2'
+  'allow_blogsite2_rsync':
+    client_list: ['103.76.228.215']
+    daemon_list: 'rsync'
+    order: '22_rsync_blogsite'
+    comment: 'Allow rsync from blogsite2'
+  'allow_blogsite2_mysqlchk':
+    client_list: ['103.76.228.215']
+    daemon_list: 'mysqlcheck'
+    order: '22_mysqlchk_blogsite'
+    comment: 'Allow mysqlchk from blogsite2'
+  'allow_blogsite1_mysqlchk':
+    client_list: ['103.76.228.122']
+    daemon_list: 'mysqlcheck'
+    order: '22_mysqlchk_blogsite'
+    comment: 'Allow mysqlchk from blogsite1'

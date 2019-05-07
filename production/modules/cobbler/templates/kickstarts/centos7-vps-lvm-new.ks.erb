@@ -1,0 +1,103 @@
+keyboard us
+lang en_US.UTF-8
+timezone UTC
+selinux --disabled
+firewall --disabled
+firstboot --disable
+text
+install
+skipx
+zerombr
+bootloader --location mbr --driveorder sda
+clearpart --all --drives sda,sdb --initlabel
+# Allow anaconda to partition the system as needed
+part swap --size 16384 --ondisk sda
+part /tmp --fstype ext4 --size 1048 --fsoptions="defaults,grpquota,noatime,nodiratime,noexec,nosuid" --ondisk sda
+part / --fstype ext4 --size 1000 --grow --fsoptions="defaults,noatime,nodiratime" --ondisk sda
+part pv.01 --size 1 --grow --ondisk sdb
+volgroup vm_instances --pesize 4096 pv.01
+logvol /vm/instances --vgname vm_instances --name vm --fstype ext4 --size 1 --grow
+
+url --url $tree
+$yum_repo_stanza
+rootpw --iscrypted $6$XayTaj7X$WLo3gu0Ic2BCZTOn0XjAONU4KuIjDaBt5id6GBRTj4zF5pxTk8ZCi226AW8e8OPkCfnqt04LeFrfoYn4Xa8na0
+$SNIPPET('network_config')
+services --disabled irqbalance,tuned,iprinit,iprdump,iprupdate,avahi-daemon,polkit,postfix,firewalld,messagebus,auditd,NetworkManager
+services --enabled puppet
+reboot
+
+%pre
+$SNIPPET('log_ks_pre')
+$SNIPPET('kickstart_start')
+$SNIPPET('pre_install_network_config')
+$SNIPPET('pre_anamon')
+%end
+
+%packages --nobase
+-biosdevname
+wget
+rsync
+rubygem-deep_merge
+ntpdate
+net-tools
+%end
+
+%post
+$SNIPPET('log_ks_post')
+$SNIPPET('post_install_kernel_options')
+$SNIPPET('post_install_network_config')
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-em1
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-em2
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-em3
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-em4
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-ipmi
+/bin/cat > /etc/sysconfig/network-scripts/ifcfg-eth1 <<EOM
+DEVICE=eth1
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+EOM
+/bin/cat > /etc/sysconfig/network-scripts/ifcfg-eth2 <<EOM
+DEVICE=eth2
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MTU=1600
+EOM
+/bin/cat > /etc/yum.repos.d/sysad-x86_64.repo <<EOM
+[sysad-x86_64]
+baseurl=https://pulp-mum.india.endurance.com/pulp/repos/sysad-el7_x86_64/
+enabled=1
+gpgcheck=0
+metadata_expire=1800
+sslverify=False
+EOM
+/usr/bin/systemctl stop NetworkManager
+/usr/bin/systemctl disable NetworkManager
+/usr/bin/systemctl restart network
+/usr/bin/echo "172.23.150.30    puppet" >> /etc/hosts
+/usr/bin/rpm -Uvh https://yum.puppet.com/puppet5/puppet5-release-el-7.noarch.rpm
+/usr/bin/yum install centos-release-qemu-ev -y
+/usr/bin/yum install puppet-agent -y
+/usr/bin/systemctl enable puppet
+/usr/bin/yum install megacli -y
+/usr/bin/MegaCli64 -LDSetProp -WT -Immediate -L0 -a0
+/usr/bin/MegaCli64 -LDSetProp -RA -Immediate -L0 -a0
+/usr/bin/MegaCli64 -LDSetProp -Cached -Immediate -L0 -a0
+/usr/bin/MegaCli64 -LDSetProp -WT -Immediate -L1 -a0
+/usr/bin/MegaCli64 -LDSetProp -NORA -Immediate -L1 -a0
+/usr/bin/MegaCli64 -LDSetProp -Direct -Immediate -L1 -a0
+/bin/sed -i '/GATEWAY/d' /etc/sysconfig/network-scripts/ifcfg-eth3.148
+/usr/sbin/ntpdate 172.23.40.4
+/usr/sbin/hwclock --systohc
+/bin/chmod 755 /vm/instances
+chown nova:nova /vm/instances
+/usr/bin/systemctl enable tuned
+/usr/bin/systemctl start tuned
+/usr/sbin/tuned-adm profile virtual-host
+/bin/echo 0 > /sys/block/sdb/queue/rotational
+/usr/bin/yum update -y
+/usr/bin/yum upgrade -y
+$SNIPPET('post_anamon')
+$SNIPPET('kickstart_done')
+%end

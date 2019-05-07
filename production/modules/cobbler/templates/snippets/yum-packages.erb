@@ -1,0 +1,22 @@
+#Packages
+yum install -y rsyslog acl sos   dos2unix gpm mtr tree sudo nc x86info exim bind-utils lldpd vim-enhanced nmap ntp ntpdate screen iptraf lsscsi mc sysstat tftp lynx elinks wget lftp rsync autoconf automake binutils gcc gdb libtool make strace ltrace postgresql xinetd kernel-devel smartmontools yum-updatesd perl ruby ruby-libs.x86_64 ruby-devel.x86_64 rubygems rubygem-rspec puppet facter augeas-libs ruby-augeas ruby-shadow rubygem-stomp mcollective OpenIPMI OpenIPMI-tools man info
+
+# disable troublesome unwanted packages:
+yum makecache && yum update -y --exclude libselinux-ruby
+
+# install some useful packages we need:
+yum install -y bash-completion
+
+# puppet config
+sed -i 's/^#PUPPET/PUPPET/g' /etc/sysconfig/puppet
+sed -i 's/puppet$/puppetmaster.directi.com/' /etc/sysconfig/puppet
+sed -i 's/--waitforcert=500/"--verbose"/g' /etc/sysconfig/puppet
+sed -i 's/ssl$/ssl\n\n\tpluginsync = true\n/' /etc/puppet/puppet.conf
+echo "server = puppetmaster.directi.com" >> /etc/puppet/puppet.conf
+
+# disable troublesome unwanted packages:
+yum makecache && yum update -y --exclude libselinux-ruby
+
+# ## install some useful packages we need:
+yum install -y bash-completion
+

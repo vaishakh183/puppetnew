@@ -1,0 +1,69 @@
+---
+bind::server::conf:
+  '/etc/named.conf':
+    listen_on_addr: [ 'any' ]
+    listen_on_v6_addr: [ 'any' ]
+    forwarders: [ '8.8.8.8', '8.8.4.4' ]
+    allow_recursion: [ 'tel-uk', 'private', 'aus-tx', 'gpx-mum', 'sdh-tr', 'tel-hk', 'c1-tx', 'aws-mum'  ]
+    allow_query: [ 'tel-uk', 'private', 'aus-tx', 'gpx-mum', 'sdh-tr', 'tel-hk', 'c1-tx', 'aws-mum' ]
+    allow_query_cache: [ 'tel-uk', 'private', 'aus-tx', 'gpx-mum', 'sdh-tr', 'tel-hk', 'c1-tx', 'aws-mum' ]
+    allow_transfer: [ 'none' ]
+    version: 'none'
+    dnssec_validation: 'auto'
+    zones:
+      as394695.net: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.as394695.net"' ]
+      172.21.0: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.172.21.0"' ]
+      aus-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.aus-tx.colo"' ]
+      vps.aus-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.vps.aus-tx.colo"' ]
+      vps.gpx-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.vps.gpx-mum.colo"' ]
+      vsnl-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.vsnl-mum.colo"' ]
+      gpx-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.gpx-mum.colo"' ]
+      tel-uk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.tel-uk.colo"' ]
+      tx1-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.tx1-tx.colo"' ]
+      c1-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.c1-tx.colo"' ]
+      sdh-tr.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.sdh-tr.colo"' ]
+      stnc-cn.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.stnc-cn.colo"' ]
+      tel-hk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.tel-hk.colo"' ]
+      shared.tel-uk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.tel-uk.colo"' ]
+      shared.aus-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.aus-tx.colo"' ]
+      shared.gpx-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.gpx-mum.colo"' ]
+      shared.sdh-tr.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.sdh-tr.colo"' ]
+      shared.tel-hk.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.tel-hk.colo"' ]
+      shared.stnc-cn.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.stnc-cn.colo"' ]
+      shared.c1-tx.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.shared.c1-tx.colo"' ]
+      oregon.aws: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.oregon.aws"' ]
+      corp.endurance.com: [ 'type forward', 'forwarders { 172.27.152.39; 172.27.152.40; }' ]
+      roving.com: [ 'type forward', 'forwarders { 172.27.152.39; 172.27.152.40; }' ]
+      prodcc.net: [ 'type forward', 'forwarders { 172.27.152.39; 172.27.152.40; }' ]
+      aws-mum.colo: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.aws-mum.colo"' ]
+      4.17.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.4.17.172.in-addr.arpa"' ]
+      210.16.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.210.16.172.in-addr.arpa"' ]
+      214.16.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.214.16.172.in-addr.arpa"' ]
+      0.21.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.0.21.172.in-addr.arpa"' ]
+      0.23.172.in-addr.arpa: [ 'type slave', 'masters { 172.17.160.48; }', 'file "slaves/bak.0.23.172.in-addr.arpa"' ]
+    includes: [ '/var/named/acl.file', '/etc/rndc.key' ]
+    extra_options:
+      recursive-clients: '20000'
+      allow-notify: '{ 172.17.160.48; }'
+      dnssec-accept-expired: 'no'
+      querylog: 'yes'
+    controls:
+      '127.0.0.1':
+        address_match_list: ['localhost']
+        keys_list: ['uk-rndc-key']
+        port: 953
+bind::server::files:
+  'acl.file':
+    source_base: 'puppet:///modules/bind/'
+bind::rndc:
+    'rndc_configuration':
+        rndc_keyname: 'uk-rndc-key'
+        rndc_algorithm: 'hmac-sha256'
+        rndc_secret: 'ENC[PKCS7,MIIBmQYJKoZIhvcNAQcDoIIBijCCAYYCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEAUJngmejvYPY7dy6h9IEQscNS4z9vlOk/Y+XCVQZm7+G2NQ0p9V2txE8js5ZF99qK6wFbWX8qi+jmdAMTBbX2ssgba5PrVdKbbUMnK7Dl+21kClDnOwP6nHTDB4yiBnqb7I6Lzf7itOe5lTTDsCCFYz1oKypN5SFSRQDPBsRTHLOqxt+65d/FyAAhN7vM/KFkFUIXp/vKXqsxwQ4UL3BZJVJpGbXsvedCHOjwLZ5p4k9Iyqlifqq8rmJPRup4NLaEHuegH4M5kPfRR6yWorzsO7G1yerFx+IVz6Mn0O7TzbXx9GzZVef9OQxn7uABhETFoV2VNRrMfEqdMctyQEVOUTBcBgkqhkiG9w0BBwEwHQYJYIZIAWUDBAEqBBDnHfGBGq8xam60UZkpoa7EgDAxj2Ug0fGPn2wdzNsweUkjSDwF8N8dgtiAB0fpPUBas1X1GrP6JOUUkrRjShHw2to=]'
+        #rndc_conf_file: 'present'
+exec:
+  'Modify ownership and permissions':
+    command: 'chown -R root /var/named/ /var/run/named && chmod 775 /var/run/named'
+    path: '/usr/bin:/bin'
+    notify: Service[named]
+    onlyif: 'stat --format "%U" /var/named/dynamic |grep named'

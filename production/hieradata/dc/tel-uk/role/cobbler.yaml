@@ -1,0 +1,29 @@
+---
+cobbler::repos:
+   sysad-el6:
+     mirror: 'http://pulp.tel-uk.colo/pulp/repos/sysad/yum/rhel6/x86_64/'
+   sysad-el5:
+     mirror: 'http://pulp.tel-uk.colo/pulp/repos/sysad/yum/rhel5/x86_64/'
+   hosting-custom-el6:
+     mirror: 'http://pulp.tel-uk.colo/pulp/repos/hosting.pw/rhel6/x86_64'
+   hosting-custom-el5:
+     mirror: 'http://pulp.tel-uk.colo/pulp/repos/hosting.pw/rhel5/x86_64'
+
+cobbler::dhcp_subnets:
+  172.21.215.0/255.255.255.0:
+    - pool_type:  'bootp'
+      range_low:  172.21.215.100
+      range_high: 172.21.215.200
+      max-lease-tigme: 3600
+      default-lease-time: 3600
+      nameservers:
+        - 172.21.40.4
+      next-server: 172.21.215.253
+      filename: 'pxelinux.0'
+
+tcpwrappers::allow:
+  'allow_tftp':
+    client_list: ['172.21.40.29','172.21.40.32','172.21.215.0/255.255.255.0']
+    daemon_list: ['in.tftpd']
+    order: '21_ftp_all'
+    comment: 'Allow private subnet for FTP access on this server'

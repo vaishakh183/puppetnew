@@ -1,0 +1,83 @@
+keyboard us
+lang en_US.UTF-8
+timezone UTC
+selinux --disabled
+firewall --disabled
+firstboot --disable
+text
+install
+skipx
+zerombr
+bootloader --location mbr --driveorder sda
+clearpart --all --drives sda,sdb --initlabel
+# Allow anaconda to partition the system as needed
+part swap --size 16384 --ondisk sda
+part /tmp --fstype ext4 --size 1048 --fsoptions="defaults,grpquota,noatime,nodiratime,noexec,nosuid" --ondisk sda
+part / --fstype ext4 --size 1000 --grow --fsoptions="defaults,noatime,nodiratime" --ondisk sda
+part pv.01 --size 1 --grow --ondisk sdb
+volgroup vm_instances --pesize 4096 pv.01
+logvol /vm/instances --vgname vm_instances --name vm --fstype ext4 --size 1 --grow
+
+url --url $tree
+$yum_repo_stanza
+rootpw --iscrypted $6$XayTaj7X$WLo3gu0Ic2BCZTOn0XjAONU4KuIjDaBt5id6GBRTj4zF5pxTk8ZCi226AW8e8OPkCfnqt04LeFrfoYn4Xa8na0
+$SNIPPET('network_config')
+services --disabled irqbalance,tuned,iprinit,iprdump,iprupdate,avahi-daemon,polkit,postfix,firewalld,messagebus,auditd,NetworkManager
+services --enabled puppet
+reboot
+
+%pre
+$SNIPPET('log_ks_pre')
+$SNIPPET('kickstart_start')
+$SNIPPET('pre_install_network_config')
+$SNIPPET('pre_anamon')
+%end
+
+%packages --nobase
+-biosdevname
+wget
+rsync
+puppet-3.7.3-1.el7
+rubygem-deep_merge
+ntpdate
+%end
+
+%post
+$SNIPPET('log_ks_post')
+$SNIPPET('post_install_kernel_options')
+$SNIPPET('post_install_network_config')
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-em1
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-em2
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-em3
+/usr/bin/rm /etc/sysconfig/network-scripts/ifcfg-em4
+/bin/cat > /etc/sysconfig/network-scripts/ifcfg-eth1 <<EOM
+DEVICE=eth1
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+EOM
+/bin/cat > /etc/sysconfig/network-scripts/ifcfg-eth2 <<EOM
+DEVICE=eth2
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MTU=1600
+EOM
+/bin/cat > /etc/sysconfig/network-scripts/ifcfg-eth2.148 <<EOM
+DEVICE=eth2.148
+TYPE=Ethernet
+VLAN=yes
+BOOTPROTO=dhcp
+ONBOOT=yes
+EOM
+/usr/sbin/ntpdate 172.23.40.4
+/usr/sbin/hwclock --systohc
+/bin/chmod 755 /vm/instances
+chown nova:nova /vm/instances
+/usr/bin/systemctl enable tuned
+/usr/bin/systemctl start tuned
+/usr/sbin/tuned-adm profile virtual-host
+/bin/echo 0 > /sys/block/sdb/queue/rotational
+$SNIPPET('post_anamon')
+$SNIPPET('kickstart_done')
+%end

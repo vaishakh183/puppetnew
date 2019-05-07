@@ -1,0 +1,9 @@
+---
+
+resolv_conf::nameservers:
+    - 10.249.10.40
+    - 8.8.4.4
+
+ntp::servers:
+  - 0.pool.ntp.org
+  - 1.pool.ntp.org

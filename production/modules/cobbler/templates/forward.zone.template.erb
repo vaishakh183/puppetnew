@@ -1,0 +1,19 @@
+\$TTL 3600
+@                       IN      SOA     ns1 hostmaster.webhostbox.net. (
+                                        $serial   ; Serial
+                                        600         ; Refresh
+                                        1800         ; Retry
+                                        604800       ; Expire
+                                        3600          ; TTL
+                                        )
+
+                        IN      NS      ns1
+                        IN      NS      ns2
+
+
+$cname_record
+
+$host_record
+<% @records[@name].each do |host, ip| -%>
+<%= host -%> IN A <%= ip -%>;
+<% end -%>

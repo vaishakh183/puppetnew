@@ -1,0 +1,182 @@
+---
+ensure_default_firewall: false
+
+packages:
+  qpid-cpp-server:
+    ensure: 'installed'
+  qpid-cpp-server-linearstore:
+    ensure: 'installed'
+  pulp-server:
+    ensure: 'installed'
+  python-gofer-qpid:
+    ensure: 'installed'
+  python-qpid:
+    ensure: 'installed'
+  qpid-tools:
+    ensure: 'installed'
+  pulp-rpm-plugins:
+    ensure: 'installed'
+  pulp-puppet-plugins:
+    ensure: 'installed'
+  pulp-docker-plugins:
+    ensure: 'installed'
+  pulp-admin-client:
+    ensure: 'installed'
+  pulp-rpm-admin-extensions:
+    ensure: 'installed'
+  pulp-puppet-admin-extensions:
+    ensure: 'installed'
+  pulp-docker-admin-extensions:
+    ensure: 'installed'
+  python2-yamlordereddictloader:
+    ensure: 'installed'
+  httpd:
+    ensure: 'installed'
+  iptables-services:
+    ensure: 'present'
+
+files:
+  '/opt/scripts':
+    ensure: 'directory'
+  '/etc/pulp/pulp.yaml':
+    source: 'puppet:///modules/profile/pulp/pulp.yaml'
+  '/etc/httpd/conf.d/ssl.conf':
+    ensure: 'present'
+    source: 'puppet:///modules/profile/pulp/ssl.conf'
+    notify: Service[httpd]
+  '/usr/lib64/nagios/plugins/custom/check_sync_time.sh':
+    ensure: 'present'
+    source: 'puppet:///modules/profile/pulp/check_sync_time.sh'
+    mode: '0755'
+
+crons:
+  'Puppet Run':
+    command: '/opt/puppetlabs/bin/puppet agent --test'
+    user: 'root'
+    minute: '*/14'
+  'Pulp Sync':
+    command: '/opt/scripts/sync-script.py'
+    user: 'root'
+    minute: '*/20'
+
+wget::fetch:
+  'https://repos.fedorapeople.org/repos/pulp/pulp/rhel-pulp.repo':
+     destination: '/etc/yum.repos.d/'
+     timeout: 15
+     verbose: true
+
+pulp::server::db_name: 'pulp_database'
+pulp::server::db_username: 'pulpadmin'
+pulp::server::db_password: 'qwedsa'
+pulp::server::default_login: 'pulp'
+pulp::server::default_password: '7PAY_p7c'
+
+pulp::admin::pulp_server: "%{fqdn}"
+pulp::admin::verify_ssl: false
+
+mongodb::server::port: '27017'
+mongodb::server::verbose: true
+
+pulp::database:
+  'pulp_database':
+    user: 'pulpadmin'
+    password_hash: '5748770fc482ada841d8f4a6677064c1'
+    roles: ['readWrite', 'dbAdmin']
+
+pulp::exec:
+  'Generating Pulp certs':
+    command: 'pulp-gen-key-pair && pulp-gen-ca-certificate'
+    path: '/usr/bin'
+    notify: Service[httpd]
+    onlyif: ['test ! -f /etc/pki/pulp/rsa.key', 'test ! -f /etc/pki/pulp/rsa_pub.key']
+  'Removing default usernames and passwords':
+    command: '/opt/scripts/delete_default_users.sh'
+    path: '/usr/bin'
+
+services:
+  'qpidd':
+    ensure: 'running'
+    enable: 'true'
+  'iptables':
+    ensure: 'stopped'
+    enable: 'false'
+    require: Package[iptables-services]
+  'ip6tables':
+    ensure: 'stopped'
+    enable: 'false'
+    require: Package[iptables-services]
+  'firewalld':
+    ensure: 'stopped'
+    enable: 'false'
+
+logrotate::rules:
+  mongodb:
+    path: ['/var/log/mongodb/mongodb.log']
+    dateext: true
+    compress: true
+    rotate: 5
+    rotate_every: 'day'
+    ifempty: true
+    missingok: true
+    delaycompress: true
+
+cis::webnodes:
+  - 'pulp-1.c1-tx.colo'
+
+auditd::main_rules:
+  - '-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change'
+  - '-a always,exit -F arch=b32 -S clock_settime -k time-change'
+  - '-w /etc/localtime -p wa -k time-change'
+  - '-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change'
+  - '-a always,exit -F arch=b64 -S clock_settime -k time-change'
+  - '-w /etc/group -p wa -k identity'
+  - '-w /etc/passwd -p wa -k identity'
+  - '-w /etc/gshadow -p wa -k identity'
+  - '-w /etc/shadow -p wa -k identity'
+  - '-w /etc/security/opasswd -p wa -k identity'
+  - '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale'
+  - '-w /etc/issue -p wa -k system-locale'
+  - '-w /etc/issue.net -p wa -k system-locale'
+  - '-w /etc/hosts -p wa -k system-locale'
+  - '-w /etc/sysconfig/network -p wa -k system-locale'
+  - '-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale'
+  - '-w /etc/selinux/ -p wa -k MAC-policy'
+  - '-w /var/run/faillock/ -p wa -k logins'
+  - '-w /var/log/lastlog -p wa -k logins'
+  - '-w /var/run/utmp -p wa -k session'
+  - '-w /var/log/wtmp -p wa -k session'
+  - '-w /var/log/btmp -p wa -k session'
+  - '-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts'
+  - '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts'
+  - '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete'
+  - '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete'
+  - '-w /etc/sudoers -p wa -k scope'
+  - '-w /etc/sudoers.d -p wa -k scope'
+  - '-w /var/log/sudo.log -p wa -k actions'
+  - '-w /sbin/insmod -p x -k modules'
+  - '-w /sbin/rmmod -p x -k modules'
+  - '-w /sbin/modprobe -p x -k modules'
+  - '-a always,exit -F arch=b32 -S init_module -S delete_module -k modules'
+  - '-a always,exit -F arch=b64 -S init_module -S delete_module -k modules'
+auditd::finalize_rules:
+  - '-e 1'
+
+logrhythm::logrhythm_server: "108.179.255.232"
+
+profile::accounts::ldap_sync::included_users:
+  - randrzejewski
+  - jjmichau
+  - jwillie
+  - pmarcotte
+  - ryan
+  - gcohoe

@@ -1,0 +1,10 @@
+---
+motd::message: 'Pluralsight Admin system'
+ntp::ntp_regional_server:
+   - 'uk.pool.ntp.org'
+   - 'us.pool.ntp.org'
+ntp::monitor: true
+ntp::ntp_local_server: '192.168.0.3'
+
+puppet_status: 'stopped'
+puppet_enable: false

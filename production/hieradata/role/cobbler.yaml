@@ -1,0 +1,233 @@
+---
+ensure_default_firewall: false
+
+
+cobbler::manage_dns: '0'
+cobbler::manage_dhcp: '1'
+cobbler::manage_tftpd: '0'
+cobler::defaultrootpw: '$1$9gVa2wvJ$qCSHR0wGmd54CaO6XrUXM0'
+cobbler::signature_url: 'http://cobbler.github.io/signatures/latest.json'
+cobbler::create_resources: true
+cobbler::purge_distro: true
+cobbler::purge_repo: true
+cobbler::purge_profile: true
+cobbler::purge_system: true
+
+cis::webnodes:
+  - 'cobbler-1.gpx-mum.colo'
+  - 'cobbler-3.gpx-mum.colo'
+  - 'cobbler-4.gpx-mum.colo'
+  - 'cobbler-3.tel-uk.colo'
+  - 'cobbler-3.tel-uk.colo'
+  - 'cobbler-4.tel-uk.colo'
+  - 'cobbler-4.aus-tx.colo'
+  - 'cobbler-3.aus-tx.colo'
+  - 'cobbler-3.tel-hk.colo'
+cis::xinetd:
+  - 'cobbler-1.gpx-mum.colo'
+  - 'cobbler-3.gpx-mum.colo'
+  - 'cobbler-4.gpx-mum.colo'
+  - 'cobbler-3.tel-uk.colo'
+  - 'cobbler-4.tel-uk.colo'
+  - 'cobbler-4.aus-tx.colo'
+  - 'cobbler-3.aus-tx.colo'
+  - 'cobbler-3.tel-hk.colo'
+
+cobbler::kickstarts:
+  - 'Centos-7.ks'
+  - 'Centos-7-rescue.ks'
+  - 'Centos-6.ks'
+  - 'Linux-Shared-Cloudlinux.ks'
+  - 'win-linux-mysql.ks'
+  - 'ubuntu-16.04-storage.seed'
+  - 'hosting-backup.ks'
+
+cobbler::snippets:
+  - 'correct_drive_labels_normal'
+  - 'omsa'
+  - 'misc-cpanel'
+  - 'misc'
+  - 'shared-repo'
+  - 'dhclient-conf'
+  - 'yum-packages'
+
+cobbler::profiles:
+  Centos-7:
+    distro: Centos-7-x86_64
+    kickstart: /var/lib/cobbler/kickstarts/custom/Centos-7.ks
+    repos:
+      - Centos-7
+      - epel-7
+  Centos-7-Rescue:
+    distro: Centos-7-x86_64
+    kickstart: /var/lib/cobbler/kickstarts/custom/Centos-7-rescue.ks
+    repos:
+      - Centos-7
+      - epel-7
+    kernel_options:
+      rescue: '~'
+  Centos-6:
+    distro: Centos-6.10-x86_64
+    kickstart: /var/lib/cobbler/kickstarts/custom/Centos-6.ks
+    repos:
+      - Centos-6
+      - epel-6
+  Centos-6-rescue:
+    distro: 'PLD_Rescue-x86_64'
+  cpanel-from-scratch_CloudLinux_6:
+    distro: CloudLinux-6.10-x86_64
+    kickstart: /var/lib/cobbler/kickstarts/custom/Linux-Shared-Cloudlinux.ks
+    nameservers: "172.21.40.4 172.21.40.11"
+    repos:
+      - epel-6
+      - centos-6
+      - hosting-custom-el6
+      - sysad-el6
+  win-linux-mysql:
+    distro: Centos-6.10-x86_64
+    kickstart: /var/lib/cobbler/kickstarts/custom/win-linux-mysql.ks
+    repos:
+      - epel-6
+      - centos-6
+      - dell-omsa
+  ubuntu16-04:
+    distro: ubuntu-16.04-x86_64
+    kickstart: /var/lib/cobbler/kickstarts/custom/ubuntu-16.04-storage.seed
+  hosting-backup:
+    distro: Centos-7-x86_64
+    kickstart: /var/lib/cobbler/kickstarts/custom/hosting-backup.ks
+    nameservers: "172.21.40.4 172.21.40.11"
+    repos:
+      - epel-6
+      - centos-6
+      - hosting-backup-el6
+      
+cobbler::distros:
+  Centos-7-x86_64:
+    arch: x86_64
+    isopath: '/distro/CentOS-7-x86_64.iso'
+    kernel: '/var/www/cobbler/ks_mirror/Centos-7-x86_64/images/pxeboot/vmlinuz'
+    initrd: '/var/www/cobbler/ks_mirror/Centos-7-x86_64/images/pxeboot/initrd.img'
+    ks_meta:
+      - tree: http://@@http_server@@/cblr/links/Centos-7-x86_64
+    kopts: 'biosdevname=0 net.ifnames=0'
+    kopts_post: 'biosdevname=0 net.ifnames=0'
+  ubuntu-16.04-x86_64:
+    arch: x86_64
+    isopath: '/distro/ubuntu-16.04.5-server-amd64.iso'
+    kernel: '/var/www/cobbler/ks_mirror/ubuntu-16.04-x86_64/install/netboot/ubuntu-installer/amd64/linux'
+    initrd: '/var/www/cobbler/ks_mirror/ubuntu-16.04-x86_64/install/netboot/ubuntu-installer/amd64/initrd.gz'
+    ks_meta:
+      - tree: http://@@http_server@@/cblr/links/ubuntu-16.04-x86_64
+    kopts: 'netcfg/choose_interface=auto biosdevname=0 net.ifnames=0'
+    kopts_post: 'netcfg/choose_interface=auto biosdevname=0 net.ifnames=0'
+  PLD_Rescue-x86_64:
+    arch: x86_64
+    breed: 'redhat'
+    isopath: '/distro/RCDx64_13_03_12.iso'
+    kernel: '/var/www/cobbler/ks_mirror/PLD_Rescue-x86_64/boot/isolinux/vmlinuz6'
+    initrd: '/var/www/cobbler/ks_mirror/PLD_Rescue-x86_64/rescue6.cpi'
+    ks_meta: []
+  Centos-6.10-x86_64:
+    arch: x86_64
+    isopath: '/distro/CentOS-6.10-x86_64.iso'
+    kernel: '/var/www/cobbler/ks_mirror/Centos-6.10-x86_64/images/pxeboot/vmlinuz'
+    initrd: '/var/www/cobbler/ks_mirror/Centos-6.10-x86_64/images/pxeboot/initrd.img'
+    ks_meta:
+      - tree: http://@@http_server@@/cblr/links/Centos-6.10-x86_64
+    kopts: 'biosdevname=0 net.ifnames=0'
+    kopts_post: 'biosdevname=0 net.ifnames=0'
+  CloudLinux-6.9-x86_64:
+    arch: x86_64
+    isopath: '/distro/CloudLinux-6.9-x86_64-DVD.iso'
+    kernel: '/var/www/cobbler/ks_mirror/CloudLinux-6.9-x86_64/images/pxeboot/vmlinuz'
+    initrd: '/var/www/cobbler/ks_mirror/CloudLinux-6.9-x86_64/images/pxeboot/initrd.img'
+    ks_meta:
+      - tree: http://@@http_server@@/cblr/links/CloudLinux-6.9-x86_64
+    kopts: 'biosdevname=0 net.ifnames=0'
+    kopts_post: 'biosdevname=0 net.ifnames=0'
+  CloudLinux-6.10-x86_64:
+    arch: x86_64
+    isopath: '/distro/CloudLinux-6.10-x86_64-DVD.iso'
+    kernel: '/var/www/cobbler/ks_mirror/CloudLinux-6.10-x86_64/images/pxeboot/vmlinuz'
+    initrd: '/var/www/cobbler/ks_mirror/CloudLinux-6.10-x86_64/images/pxeboot/initrd.img'
+    ks_meta:
+      - tree: http://@@http_server@@/cblr/links/CloudLinux-6.10-x86_64
+    kopts: 'biosdevname=0 net.ifnames=0'
+    kopts_post: 'biosdevname=0 net.ifnames=0'
+  
+cobbler::repos:
+  Centos-7:
+    mirror: "http://mirrors.unifiedlayer.com/centos/7/os/%{architecture}"
+  Centos-6:
+    mirror: "http://mirrors.unifiedlayer.com/centos/6/os/%{architecture}"
+  epel-6:
+    mirror: "http://dl.fedoraproject.org/pub/epel/6/%{architecture}"
+  epel-7:
+    mirror: "http://dl.fedoraproject.org/pub/epel/7/%{architecture}"
+  dell-omsa:
+    mirror: 'http://linux.dell.com/repo/hardware/latest/platform_independent/rh60_64/'
+
+files:
+  '/etc/xinetd.d/tftp':
+    source: 'puppet:///modules/profile/sysops/tftp'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    notify: Service[xinetd]
+
+auditd::main_rules:
+  - '-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change'
+  - '-a always,exit -F arch=b32 -S clock_settime -k time-change'
+  - '-w /etc/localtime -p wa -k time-change'
+  - '-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change'
+  - '-a always,exit -F arch=b64 -S clock_settime -k time-change'
+  - '-w /etc/group -p wa -k identity'
+  - '-w /etc/passwd -p wa -k identity'
+  - '-w /etc/gshadow -p wa -k identity'
+  - '-w /etc/shadow -p wa -k identity'
+  - '-w /etc/security/opasswd -p wa -k identity'
+  - '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale'
+  - '-w /etc/issue -p wa -k system-locale'
+  - '-w /etc/issue.net -p wa -k system-locale'
+  - '-w /etc/hosts -p wa -k system-locale'
+  - '-w /etc/sysconfig/network -p wa -k system-locale'
+  - '-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale'
+  - '-w /etc/selinux/ -p wa -k MAC-policy'
+  - '-w /var/run/faillock/ -p wa -k logins'
+  - '-w /var/log/lastlog -p wa -k logins'
+  - '-w /var/run/utmp -p wa -k session'
+  - '-w /var/log/wtmp -p wa -k session'
+  - '-w /var/log/btmp -p wa -k session'
+  - '-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  - '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access'
+  - '-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts'
+  - '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts'
+  - '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete'
+  - '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete'
+  - '-w /etc/sudoers -p wa -k scope'
+  - '-w /etc/sudoers.d -p wa -k scope'
+  - '-w /var/log/sudo.log -p wa -k actions'
+  - '-w /sbin/insmod -p x -k modules'
+  - '-w /sbin/rmmod -p x -k modules'
+  - '-w /sbin/modprobe -p x -k modules'
+  - '-a always,exit -F arch=b32 -S init_module -S delete_module -k modules'
+  - '-a always,exit -F arch=b64 -S init_module -S delete_module -k modules'
+auditd::finalize_rules:
+  - '-e 1'
+
+profile::accounts::ldap_sync::included_users:
+  - randrzejewski
+  - jjmichau
+  - jwillie
+  - pmarcotte
+  - ryan
+  - gcohoe
